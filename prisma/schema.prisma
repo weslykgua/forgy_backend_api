@@ -1,0 +1,101 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Exercise {
+  id           String       @id @default(uuid())
+  name         String
+  muscle       String
+  video        String?
+  description  String?
+  difficulty   String?
+  equipment    String?
+  instructions String[]
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  workoutLogs  WorkoutLog[]
+
+  @@index([muscle])
+  @@map("exercises")
+}
+
+model WorkoutLog {
+  id           String   @id @default(uuid())
+  date         String
+  exerciseId   String
+  exerciseName String
+  sets         Json // Array de { reps, weight, completed }
+  duration     Int? // en minutos
+  notes        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  exercise Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+
+  @@index([date])
+  @@index([exerciseId])
+  @@map("workout_logs")
+}
+
+model DailyProgress {
+  id               String   @id @default(uuid())
+  date             String   @unique
+  weight           Float?
+  waterIntake      Int? // en ml
+  caloriesConsumed Int?
+  caloriesBurned   Int?
+  sleepHours       Float?
+  mood             String?
+  notes            String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([date])
+  @@map("daily_progress")
+}
+
+// Modelos adicionales que podrías necesitar
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String?
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+model NutritionPlan {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  meals       Json // Array de comidas del día
+  totalCalories Int?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("nutrition_plans")
+}
+
+model Goal {
+  id          String   @id @default(uuid())
+  type        String // weight, muscle, endurance, etc.
+  target      Float
+  current     Float
+  deadline    DateTime?
+  achieved    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("goals")
+}

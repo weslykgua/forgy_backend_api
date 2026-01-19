@@ -1,26 +1,63 @@
 {
   "name": "backend-api",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Forgy Platform Backend API with Prisma ORM",
+  "main": "dist/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "nodemon --exec ts-node src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    
+    "typecheck": "tsc --noEmit",
+    "typecheck:watch": "tsc --noEmit --watch",
+    "lint": "eslint . --ext .ts",
+    "lint:fix": "eslint . --ext .ts --fix",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "format:check": "prettier --check \"src/**/*.ts\"",
+    "check": "npm run typecheck && npm run format:check",
+    
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:deploy": "prisma migrate deploy",
+    "prisma:studio": "prisma studio",
+    "prisma:reset": "prisma migrate reset",
+    
+    "migrate:data": "ts-node src/scripts/migrate-data.ts",
+    
+    "docker:build": "docker build -t forgy-backend .",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f backend",
+    "docker:restart": "docker-compose restart backend",
+    "docker:rebuild": "docker-compose down && docker-compose up --build -d"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": ["fitness", "api", "typescript", "prisma", "postgresql"],
+  "author": "Forgy Team",
   "license": "ISC",
   "dependencies": {
+    "@prisma/client": "^5.22.0",
     "cors": "2.8.5",
     "dotenv": "17.2.3",
     "express": "5.2.1",
-    "socket.io": "4.8.3"
+    "socket.io": "4.8.3",
+    "helmet": "^7.2.0",
+    "morgan": "^1.10.0",
+    "compression": "^1.7.4"
   },
   "devDependencies": {
     "@types/cors": "2.8.19",
     "@types/express": "5.0.6",
     "@types/node": "25.0.8",
+    "@types/morgan": "^1.9.9",
+    "@types/compression": "^1.7.5",
     "nodemon": "3.1.11",
     "ts-node": "10.9.2",
-    "typescript": "5.9.3"
+    "typescript": "5.9.3",
+    "prisma": "^5.22.0",
+    "eslint": "^9.39.2",
+    "@typescript-eslint/parser": "^8.18.2",
+    "@typescript-eslint/eslint-plugin": "^8.18.2",
+    "prettier": "^3.4.2"
   }
 }

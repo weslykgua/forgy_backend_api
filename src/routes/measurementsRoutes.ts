@@ -1,11 +1,11 @@
-import { Router } from 'express';
-import { getMeasurements, createMeasurement } from '../controllers/measurementsController';
+import { Router } from 'express'
+import { getMeasurements, createMeasurement } from '../controllers/measurementsController'
 
 export function getMeasurementsRoutes() {
-    const router = Router();
+  const router = Router()
 
-    router.get('/', getMeasurements);
-    router.post('/', createMeasurement);
+  router.get('/', getMeasurements)
+  router.post('/', createMeasurement)
 
-    return router;
+  return router
 }
