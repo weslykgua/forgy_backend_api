@@ -6,6 +6,7 @@ import { Server } from 'socket.io'
 import helmet from 'helmet'
 import morgan from 'morgan'
 import compression from 'compression'
+import authRoutes from './routes/authRoutes'
 
 // Configuración de Prisma
 import { connectDB } from './config/database'
@@ -54,12 +55,16 @@ app.get('/', (req: Request, res: Response) => {
     version: '1.0.0',
     endpoints: {
       health: '/health',
+      auth: '/auth',
       exercises: '/exercises',
       workouts: '/workouts',
       progress: '/progress',
     },
   })
 })
+
+// ========== AUTH ==========
+app.use('/auth', authRoutes)
 
 // ========== EJERCICIOS ==========
 
