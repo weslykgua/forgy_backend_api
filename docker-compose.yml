@@ -1,0 +1,55 @@
+services:
+  # Base de datos PostgreSQL
+  postgres:
+    image: postgres:15-alpine
+    container_name: forgy-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: forgy_user
+      POSTGRES_PASSWORD: forgy_password
+      POSTGRES_DB: forgy_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U forgy_user -d forgy_db" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend API
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: forgy-backend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_URL: postgresql://forgy_user:forgy_password@postgres:5432/forgy_db
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      # Para desarrollo: montar código en tiempo real (comentar en producción)
+      - .:/app
+      - /app/node_modules
+  prismastudio:
+    build:
+      context: .
+      dockerfile: studio.dockerfile
+    container_name: forgy-studio
+    restart: unless-stopped
+    ports:
+      - "5555:5555"
+    environment:
+      NODE_ENV: production
+      PORT: 5555
+      DATABASE_URL: postgresql://forgy_user:forgy_password@postgres:5432/forgy_db
+    depends_on:
+      postgres:
+        condition: service_healthy
