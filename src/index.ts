@@ -421,29 +421,3 @@ app.use((err: Error, req: Request, res: Response, next: any) => {
     error: process.env.NODE_ENV === 'development' ? err.message : undefined,
   })
 })
-
-// ========== INICIAR SERVIDOR ==========
-const startServer = async () => {
-  try {
-    // Conectar a la base de datos
-    await connectDB()
-
-    // Iniciar servidor
-    httpServer.listen(PORT, () => {
-      console.log(`
-╔═══════════════════════════════════════════╗
-║   🚀 FORGY BACKEND API                    ║
-║   📡 Server: http://localhost:${PORT}       ║
-║   🗄️  Database: PostgreSQL + Prisma       ║
-║   🔌 WebSocket: Enabled                   ║
-║   🌍 Environment: ${process.env.NODE_ENV || 'development'}              ║
-╚═══════════════════════════════════════════╝
-      `)
-    })
-  } catch (error) {
-    console.error('❌ Error al iniciar el servidor:', error)
-    process.exit(1)
-  }
-}
-
-startServer()
