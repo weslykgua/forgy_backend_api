@@ -1,12 +1,15 @@
 import { Request, Response } from 'express';
-import { prisma } from '../scripts/migrate-data'
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient().routine
+
 /**
  * GET /routines
  * Obtiene todas las rutinas con sus ejercicios
  */
 export async function getRoutines(req: Request, res: Response) {
   try {
-    const routines = await prisma.routine.findMany({
+    const routines = await prisma.findMany({
       orderBy: { createdAt: 'desc' },
       include: { exercises: true }
     });
@@ -54,9 +57,8 @@ export async function addExerciseToRoutine(req: Request, res: Response) {
       return res.status(400).json({ message: 'exerciseId es obligatorio' });
     }
 
-    const routineId = Array.isArray(id) ? id[0] : id;
     const routine = await prisma.routine.findUnique({
-      where: { id: routineId }
+      where: { id }
     });
 
     if (!routine) {
@@ -64,7 +66,7 @@ export async function addExerciseToRoutine(req: Request, res: Response) {
     }
 
     await prisma.routine.update({
-      where: { id: routineId },
+      where: { id },
       data: {
         exercises: {
           connect: { id: exerciseId }
@@ -115,10 +117,9 @@ export async function removeExerciseFromRoutine(req: Request, res: Response) {
   try {
     const { id, exerciseId } = req.params;
     const routineId = Array.isArray(id) ? id[0] : id;
-    const exId = Array.isArray(exerciseId) ? exerciseId[0] : exerciseId;
 
     const routine = await prisma.routine.findUnique({
-      where: { id: routineId }
+      where: { id: id }
     });
 
     if (!routine) {
@@ -126,10 +127,10 @@ export async function removeExerciseFromRoutine(req: Request, res: Response) {
     }
 
     await prisma.routine.update({
-      where: { id: routineId },
+      where: { id },
       data: {
         exercises: {
-          disconnect: { id: exId }
+          disconnect: { id: exerciseId }
         }
       }
     });
