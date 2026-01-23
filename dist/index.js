@@ -11,7 +11,9 @@ const socket_io_1 = require("socket.io");
 const helmet_1 = __importDefault(require("helmet"));
 const morgan_1 = __importDefault(require("morgan"));
 const compression_1 = __importDefault(require("compression"));
-const database_1 = __importDefault(require("./config/database"));
+// Configuración de Prisma
+const database_1 = require("./config/database");
+const database_2 = __importDefault(require("./config/database"));
 // Cargar variables de entorno
 dotenv_1.default.config();
 // Crear app Express
@@ -59,7 +61,7 @@ app.get('/', (req, res) => {
 // GET: Obtener todos los ejercicios
 app.get('/exercises', async (req, res) => {
     try {
-        const exercises = await database_1.default.exercise.findMany({
+        const exercises = await database_2.default.exercise.findMany({
             orderBy: { createdAt: 'desc' },
         });
         res.json(exercises);
@@ -77,7 +79,7 @@ app.get('/exercises', async (req, res) => {
 app.get('/exercises/muscle/:muscle', async (req, res) => {
     try {
         const muscle = Array.isArray(req.params.muscle) ? req.params.muscle[0] : req.params.muscle;
-        const exercises = await database_1.default.exercise.findMany({
+        const exercises = await database_2.default.exercise.findMany({
             where: { muscle },
         });
         res.json(exercises);
@@ -95,7 +97,7 @@ app.get('/exercises/muscle/:muscle', async (req, res) => {
 app.get('/exercises/:id', async (req, res) => {
     try {
         const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
-        const exercise = await database_1.default.exercise.findUnique({
+        const exercise = await database_2.default.exercise.findUnique({
             where: { id },
             include: {
                 workoutLogs: {
@@ -124,7 +126,7 @@ app.get('/exercises/:id', async (req, res) => {
 // POST: Crear un ejercicio
 app.post('/exercises', async (req, res) => {
     try {
-        const exercise = await database_1.default.exercise.create({
+        const exercise = await database_2.default.exercise.create({
             data: {
                 name: req.body.name,
                 muscle: req.body.muscle,
@@ -156,7 +158,7 @@ app.post('/exercises', async (req, res) => {
 app.put('/exercises/:id', async (req, res) => {
     try {
         const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
-        const exercise = await database_1.default.exercise.update({
+        const exercise = await database_2.default.exercise.update({
             where: { id },
             data: {
                 ...(req.body.name && { name: req.body.name }),
@@ -189,7 +191,7 @@ app.put('/exercises/:id', async (req, res) => {
 app.delete('/exercises/:id', async (req, res) => {
     try {
         const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
-        await database_1.default.exercise.delete({
+        await database_2.default.exercise.delete({
             where: { id },
         });
         // Emitir evento WebSocket
@@ -212,7 +214,7 @@ app.delete('/exercises/:id', async (req, res) => {
 // GET: Obtener todos los workouts
 app.get('/workouts', async (req, res) => {
     try {
-        const workouts = await database_1.default.workoutLog.findMany({
+        const workouts = await database_2.default.workoutLog.findMany({
             include: {
                 exercise: true,
             },
@@ -228,7 +230,7 @@ app.get('/workouts', async (req, res) => {
 // GET: Historial de workouts
 app.get('/workouts/history', async (req, res) => {
     try {
-        const workouts = await database_1.default.workoutLog.findMany({
+        const workouts = await database_2.default.workoutLog.findMany({
             orderBy: { date: 'desc' },
             take: 100,
         });
@@ -241,7 +243,7 @@ app.get('/workouts/history', async (req, res) => {
 // GET: Personal Records
 app.get('/workouts/prs', async (req, res) => {
     try {
-        const allWorkouts = await database_1.default.workoutLog.findMany({
+        const allWorkouts = await database_2.default.workoutLog.findMany({
             include: { exercise: true },
         });
         const prs = allWorkouts.reduce((acc, workout) => {
@@ -264,7 +266,7 @@ app.get('/workouts/prs', async (req, res) => {
 // POST: Crear workout
 app.post('/workouts', async (req, res) => {
     try {
-        const workout = await database_1.default.workoutLog.create({
+        const workout = await database_2.default.workoutLog.create({
             data: {
                 date: req.body.date || new Date().toISOString().split('T')[0],
                 exerciseId: req.body.exerciseId,
@@ -285,7 +287,7 @@ app.post('/workouts', async (req, res) => {
 // GET: Obtener todo el progreso
 app.get('/progress', async (req, res) => {
     try {
-        const progress = await database_1.default.dailyProgress.findMany({
+        const progress = await database_2.default.dailyProgress.findMany({
             orderBy: { date: 'desc' },
         });
         res.json(progress);
@@ -297,9 +299,9 @@ app.get('/progress', async (req, res) => {
 // GET: Estadísticas de progreso
 app.get('/progress/stats', async (req, res) => {
     try {
-        const workouts = await database_1.default.workoutLog.count();
-        const progress = await database_1.default.dailyProgress.findMany({ orderBy: { date: 'desc' } });
-        const totalVolume = await database_1.default.workoutLog
+        const workouts = await database_2.default.workoutLog.count();
+        const progress = await database_2.default.dailyProgress.findMany({ orderBy: { date: 'desc' } });
+        const totalVolume = await database_2.default.workoutLog
             .findMany({
             select: { sets: true },
         })
@@ -323,12 +325,12 @@ app.get('/progress/stats', async (req, res) => {
 app.post('/progress', async (req, res) => {
     try {
         const { date, weight, waterIntake, caloriesConsumed, caloriesBurned, sleepHours, mood, notes } = req.body;
-        const existing = await database_1.default.dailyProgress.findUnique({
+        const existing = await database_2.default.dailyProgress.findUnique({
             where: { date },
         });
         let progress;
         if (existing) {
-            progress = await database_1.default.dailyProgress.update({
+            progress = await database_2.default.dailyProgress.update({
                 where: { date },
                 data: {
                     ...(weight !== undefined && { weight }),
@@ -342,7 +344,7 @@ app.post('/progress', async (req, res) => {
             });
         }
         else {
-            progress = await database_1.default.dailyProgress.create({
+            progress = await database_2.default.dailyProgress.create({
                 data: {
                     date,
                     weight,
@@ -385,4 +387,9 @@ app.use((err, req, res, next) => {
         message: 'Error interno del servidor',
         error: process.env.NODE_ENV === 'development' ? err.message : undefined,
     });
+});
+// Iniciar servidor
+httpServer.listen(PORT, () => {
+    console.log(`🚀 Servidor corriendo en puerto ${PORT}`);
+    (0, database_1.connectDB)();
 });

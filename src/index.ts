@@ -263,7 +263,7 @@ app.get('/workouts/prs', async (req: Request, res: Response) => {
       include: { exercise: true },
     })
 
-    const prs = allWorkouts.reduce((acc: any[], workout) => {
+    const prs = allWorkouts.reduce((acc: any[], workout: any) => {
       const maxWeight = Math.max(...(workout.sets as any[]).map((s: any) => s.weight || 0))
       const existing = acc.find((pr) => pr.exerciseName === workout.exerciseName)
 
@@ -276,7 +276,7 @@ app.get('/workouts/prs', async (req: Request, res: Response) => {
       return acc
     }, [])
 
-    res.json(prs.sort((a, b) => b.maxWeight - a.maxWeight))
+    res.json(prs.sort((a: any, b: any) => b.maxWeight - a.maxWeight))
   } catch (error) {
     res.status(500).json({ success: false, message: 'Error' })
   }
@@ -327,8 +327,8 @@ app.get('/progress/stats', async (req: Request, res: Response) => {
       .findMany({
         select: { sets: true },
       })
-      .then((logs) =>
-        logs.reduce((sum, log) => {
+      .then((logs: any[]) =>
+        logs.reduce((sum: number, log: any) => {
           const vol = (log.sets as any[]).reduce((s, set) => s + set.reps * set.weight, 0)
           return sum + vol
         }, 0)
@@ -420,4 +420,10 @@ app.use((err: Error, req: Request, res: Response, next: any) => {
     message: 'Error interno del servidor',
     error: process.env.NODE_ENV === 'development' ? err.message : undefined,
   })
+})
+
+// Iniciar servidor
+httpServer.listen(PORT, () => {
+  console.log(`🚀 Servidor corriendo en puerto ${PORT}`)
+  connectDB()
 })
