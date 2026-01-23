@@ -25,6 +25,29 @@ model Exercise {
 
   @@index([muscle])
   @@map("exercises")
+  routines Routine[] @relation("RoutineExercises")
+}
+
+model Routine {
+  id        String     @id @default(uuid())
+  name      String
+  exercises Exercise[] @relation("RoutineExercises")
+  createdAt DateTime   @default(now())
+}
+
+model BodyMeasurement {
+  id           String   @id @default(uuid())
+  date         String
+  chest        Float?
+  waist        Float?
+  hips         Float?
+  bicepLeft    Float?
+  bicepRight   Float?
+  thighLeft    Float?
+  thighRight   Float?
+  createdAt    DateTime @default(now())
+
+  @@map("body_measurements")
 }
 
 model WorkoutLog {

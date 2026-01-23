@@ -1,6 +1,7 @@
 import { Request, Response } from 'express'
 import { BodyMeasurement } from '../interfaces/BodyMeasurement'
 import { bodyMeasurementsDB } from '../data/measurementsData'
+import { prisma } from '../scripts/migrate-data'
 
 export function getMeasurements(req: Request, res: Response) {
   res.json(bodyMeasurementsDB)

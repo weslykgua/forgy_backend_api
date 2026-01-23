@@ -1,6 +1,7 @@
 import { Exercise } from '../interfaces/Exercise'
 import { Request, Response } from 'express'
 import { exercisesDB } from '../data/exercisesData'
+import { prisma } from '../scripts/migrate-data'
 
 export function getExercises(req: Request, res: Response) {
   const { muscle, difficulty, search } = req.query

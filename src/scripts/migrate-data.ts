@@ -3,7 +3,7 @@ import { exercisesDB } from '../data/exercisesData'
 import { workoutLogsDB } from '../data/workoutsData'
 import { dailyProgressDB } from '../data/progressData'
 
-const prisma = new PrismaClient()
+export const prisma = new PrismaClient()
 
 async function migrateData() {
   console.log('🚀 Iniciando migración de datos...\n')

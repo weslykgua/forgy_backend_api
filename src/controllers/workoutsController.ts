@@ -2,6 +2,7 @@ import { Request, Response } from 'express'
 import { WorkoutLog } from '../interfaces/WorkoutLog'
 import { workoutLogsDB } from '../data/workoutsData'
 import { dailyProgressDB } from '../data/progressData'
+import { prisma } from '../scripts/migrate-data'
 
 export function getWorkouts(req: Request, res: Response) {
   const { date, startDate, endDate } = req.query

@@ -1,22 +1,23 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.prisma = void 0;
 const client_1 = require("@prisma/client");
 const exercisesData_1 = require("../data/exercisesData");
 const workoutsData_1 = require("../data/workoutsData");
 const progressData_1 = require("../data/progressData");
-const prisma = new client_1.PrismaClient();
+exports.prisma = new client_1.PrismaClient();
 async function migrateData() {
     console.log('🚀 Iniciando migración de datos...\n');
     try {
         // 1. Limpiar datos existentes (opcional)
         console.log('🧹 Limpiando datos existentes...');
-        await prisma.workoutLog.deleteMany({});
-        await prisma.dailyProgress.deleteMany({});
-        await prisma.exercise.deleteMany({});
+        await exports.prisma.workoutLog.deleteMany({});
+        await exports.prisma.dailyProgress.deleteMany({});
+        await exports.prisma.exercise.deleteMany({});
         console.log('✅ Datos anteriores eliminados\n');
         // 2. Migrar Ejercicios
         console.log('💪 Migrando ejercicios...');
-        const exercisesCreated = await Promise.all(exercisesData_1.exercisesDB.map((exercise) => prisma.exercise.create({
+        const exercisesCreated = await Promise.all(exercisesData_1.exercisesDB.map((exercise) => exports.prisma.exercise.create({
             data: {
                 id: exercise.id,
                 name: exercise.name,
@@ -32,7 +33,7 @@ async function migrateData() {
         console.log(`✅ ${exercisesCreated.length} ejercicios migrados\n`);
         // 3. Migrar Workout Logs
         console.log('🏋️ Migrando registros de entrenamientos...');
-        const workoutLogsCreated = await Promise.all(workoutsData_1.workoutLogsDB.map((log) => prisma.workoutLog.create({
+        const workoutLogsCreated = await Promise.all(workoutsData_1.workoutLogsDB.map((log) => exports.prisma.workoutLog.create({
             data: {
                 id: log.id,
                 date: log.date,
@@ -47,7 +48,7 @@ async function migrateData() {
         console.log(`✅ ${workoutLogsCreated.length} registros de entrenamiento migrados\n`);
         // 4. Migrar Daily Progress
         console.log('📊 Migrando progreso diario...');
-        const dailyProgressCreated = await Promise.all(progressData_1.dailyProgressDB.map((progress) => prisma.dailyProgress.create({
+        const dailyProgressCreated = await Promise.all(progressData_1.dailyProgressDB.map((progress) => exports.prisma.dailyProgress.create({
             data: {
                 id: progress.id,
                 date: progress.date,
@@ -64,9 +65,9 @@ async function migrateData() {
         console.log(`✅ ${dailyProgressCreated.length} registros de progreso diario migrados\n`);
         // 5. Verificar datos migrados
         console.log('🔍 Verificando migración...');
-        const exercisesCount = await prisma.exercise.count();
-        const workoutLogsCount = await prisma.workoutLog.count();
-        const dailyProgressCount = await prisma.dailyProgress.count();
+        const exercisesCount = await exports.prisma.exercise.count();
+        const workoutLogsCount = await exports.prisma.workoutLog.count();
+        const dailyProgressCount = await exports.prisma.dailyProgress.count();
         console.log(`
 📈 Resumen de la migración:
    - Ejercicios: ${exercisesCount}
@@ -80,7 +81,7 @@ async function migrateData() {
         throw error;
     }
     finally {
-        await prisma.$disconnect();
+        await exports.prisma.$disconnect();
     }
 }
 // Ejecutar migración
