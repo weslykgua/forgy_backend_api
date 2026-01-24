@@ -1,5 +1,5 @@
 import { Request, Response } from 'express'
-import { PrismaClient } from '@prisma/client'
+import { Prisma, PrismaClient } from '@prisma/client'
 import { updateWorkoutStreak } from './streakController'
 import { checkAndUpdateRecords } from './recordsController'
 
@@ -53,7 +53,18 @@ export async function createWorkout(req: Request, res: Response) {
     res.status(201).json(session)
   } catch (error) {
     console.error(error)
-    res.status(400).json({ error: 'Error al crear entrenamiento' })
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      // Foreign key constraint failed (e.g., userId or routineId does not exist)
+      if (error.code === 'P2003') {
+        const field = error.meta?.field_name;
+        return res.status(400).json({
+          error: `Error de referencia inválida`,
+          details: `El ID proporcionado para '${field}' no existe.`
+        });
+      }
+    }
+    // Generic error
+    res.status(400).json({ error: 'Error al crear entrenamiento', details: error instanceof Error ? error.message : String(error) })
   }
 }
 
