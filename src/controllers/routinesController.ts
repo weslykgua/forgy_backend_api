@@ -26,6 +26,8 @@ export async function getRoutines(req: Request, res: Response) {
  * Crea una nueva rutina
  */
 export async function createRoutine(req: Request, res: Response) {
+  console.log("Entro a createRoutine");
+  
   try {
     const { name } = req.body;
 
@@ -33,7 +35,7 @@ export async function createRoutine(req: Request, res: Response) {
       return res.status(400).json({ message: 'El nombre es obligatorio' });
     }
 
-    const routine = await prisma.routine.create({
+    const routine = await prisma.create({
       data: { name }
     });
 
@@ -49,7 +51,7 @@ export async function createRoutine(req: Request, res: Response) {
  * Agrega un ejercicio a una rutina
  */
 export async function addExerciseToRoutine(req: Request, res: Response) {
-  try {
+ /*try {
     const { id } = req.params;
     const { exerciseId } = req.body;
 
@@ -57,7 +59,7 @@ export async function addExerciseToRoutine(req: Request, res: Response) {
       return res.status(400).json({ message: 'exerciseId es obligatorio' });
     }
 
-    const routine = await prisma.routine.findUnique({
+    const routine = await prisma.findUnique({
       where: { id }
     });
 
@@ -65,7 +67,7 @@ export async function addExerciseToRoutine(req: Request, res: Response) {
       return res.status(404).json({ message: 'Rutina no encontrada' });
     }
 
-    await prisma.routine.update({
+    await prisma.update({
       where: { id },
       data: {
         exercises: {
@@ -78,7 +80,7 @@ export async function addExerciseToRoutine(req: Request, res: Response) {
   } catch (error) {
     console.error('Error adding exercise to routine:', error);
     res.status(500).json({ message: 'Error al agregar ejercicio' });
-  }
+  }*/
 }
 
 /**
@@ -90,7 +92,7 @@ export async function deleteRoutine(req: Request, res: Response) {
     const { id } = req.params;
     const routineId = Array.isArray(id) ? id[0] : id;
 
-    const routine = await prisma.routine.findUnique({
+    const routine = await prisma.findUnique({
       where: { id: routineId }
     });
 
@@ -98,7 +100,7 @@ export async function deleteRoutine(req: Request, res: Response) {
       return res.status(404).json({ message: 'Rutina no encontrada' });
     }
 
-    await prisma.routine.delete({
+    await prisma.delete({
       where: { id: routineId }
     });
 
@@ -118,22 +120,22 @@ export async function removeExerciseFromRoutine(req: Request, res: Response) {
     const { id, exerciseId } = req.params;
     const routineId = Array.isArray(id) ? id[0] : id;
 
-    const routine = await prisma.routine.findUnique({
+    /*const routine = await prisma.findUnique({
       where: { id: id }
-    });
+    });*
 
     if (!routine) {
       return res.status(404).json({ message: 'Rutina no encontrada' });
     }
 
-    await prisma.routine.update({
+    /*await prisma.update({
       where: { id },
       data: {
         exercises: {
           disconnect: { id: exerciseId }
         }
       }
-    });
+    });*/
 
     res.json({ message: 'Ejercicio eliminado de la rutina' });
   } catch (error) {

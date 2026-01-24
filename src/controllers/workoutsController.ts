@@ -1,46 +1,89 @@
 import { Request, Response } from 'express'
-import { WorkoutLog } from '../interfaces/WorkoutLog'
-import { workoutLogsDB } from '../data/workoutsData'
-import { dailyProgressDB } from '../data/progressData'
-import { prisma } from '../scripts/migrate-data'
+import { PrismaClient } from '@prisma/client'
 
-export function getWorkouts(req: Request, res: Response) {
-  const { date, startDate, endDate } = req.query
-  let filtered = [...workoutLogsDB]
+const prisma = new PrismaClient()
 
-  if (date) {
-    filtered = filtered.filter((w) => w.date === date)
-  }
-  if (startDate && endDate) {
-    filtered = filtered.filter((w) => w.date >= startDate && w.date <= endDate)
-  }
-  res.json(filtered)
-}
+// --- GET: Listar entrenamientos con filtros ---
+export async function getWorkouts(req: Request, res: Response) {
+  try {
+    const { date, startDate, endDate } = req.query
+    const where: any = {}
 
-export function getWorkoutById(req: Request, res: Response) {
-  const workout = workoutLogsDB.find((w) => w.id === req.params.id)
-  if (!workout) return res.status(404).json({ error: 'Entrenamiento no encontrado' })
-  res.json(workout)
-}
-
-export function getWorkoutHistory(req: Request, res: Response) {
-  const grouped: {
-    [date: string]: { workouts: WorkoutLog[]; totalVolume: number; totalDuration: number }
-  } = {}
-
-  workoutLogsDB.forEach((workout) => {
-    if (!grouped[workout.date]) {
-      grouped[workout.date] = { workouts: [], totalVolume: 0, totalDuration: 0 }
+    if (date) {
+      where.date = date as string
+    } else if (startDate && endDate) {
+      where.date = { gte: startDate as string, lte: endDate as string }
     }
-    grouped[workout.date].workouts.push(workout)
-    grouped[workout.date].totalVolume += workout.sets.reduce((acc, s) => acc + s.reps * s.weight, 0)
-    grouped[workout.date].totalDuration += workout.duration
-  })
 
-  const history = Object.entries(grouped)
-    .sort(([a], [b]) => b.localeCompare(a))
-    .slice(0, 30)
-    .map(([date, data]) => ({
+    const workouts = await prisma.workoutLog.findMany({
+      where,
+      include: { sets: true }, // Traemos los sets asociados
+      orderBy: { date: 'desc' }
+    })
+    res.json(workouts)
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener entrenamientos' })
+  }
+}
+
+// --- GET: Por ID ---
+export async function getWorkoutById(req: Request, res: Response) {
+  try {
+    const workout = await prisma.workoutLog.findUnique({
+      where: { id: req.params.id },
+      include: { sets: true }
+    })
+    if (!workout) return res.status(404).json({ error: 'Entrenamiento no encontrado' })
+    res.json(workout)
+  } catch (error) {
+    res.status(500).json({ error: 'Error en el servidor' })
+  }
+}
+
+// --- POST: Crear entrenamiento y sus sets ---
+export async function createWorkout(req: Request, res: Response) {
+  try {
+    const { sets, ...rest } = req.body
+    
+    // Prisma permite crear el entrenamiento y sus sets en una sola operación (Nested Write)
+    const newWorkout = await prisma.workoutLog.create({
+      data: {
+        ...rest,
+        date: rest.date || new Date().toISOString().split('T')[0],
+        sets: {
+          create: sets // Asumiendo que enviamos un array de sets
+        }
+      },
+      include: { sets: true }
+    })
+    res.status(201).json(newWorkout)
+  } catch (error) {
+    res.status(400).json({ error: 'Error al crear el registro' })
+  }
+}
+
+// --- GET: Historial agrupado ---
+export async function getWorkoutHistory(req: Request, res: Response) {
+  try {
+    const workouts = await prisma.workoutLog.findMany({
+      include: { sets: true },
+      orderBy: { date: 'desc' },
+      take: 50 // Limitamos para rendimiento
+    })
+
+    const grouped: any = {}
+
+    workouts.forEach((w) => {
+      if (!grouped[w.date]) {
+        grouped[w.date] = { workouts: [], totalVolume: 0, totalDuration: 0 }
+      }
+      const volume = w.sets.reduce((acc: number, s: any) => acc + (s.reps * s.weight), 0)
+      grouped[w.date].workouts.push(w)
+      grouped[w.date].totalVolume += volume
+      grouped[w.date].totalDuration += w.duration
+    })
+
+    const history = Object.entries(grouped).map(([date, data]: [string, any]) => ({
       date,
       exerciseCount: data.workouts.length,
       totalVolume: Math.round(data.totalVolume),
@@ -48,82 +91,22 @@ export function getWorkoutHistory(req: Request, res: Response) {
       workouts: data.workouts,
     }))
 
-  res.json(history)
-}
-
-export function getPersonalRecords(req: Request, res: Response) {
-  const prs: {
-    [exerciseId: string]: {
-      exerciseName: string
-      maxWeight: number
-      maxVolume: number
-      date: string
-    }
-  } = {}
-
-  workoutLogsDB.forEach((workout) => {
-    const maxSetWeight = Math.max(...workout.sets.map((s) => s.weight))
-    const workoutVolume = workout.sets.reduce((acc, s) => acc + s.reps * s.weight, 0)
-
-    if (!prs[workout.exerciseId] || maxSetWeight > prs[workout.exerciseId].maxWeight) {
-      prs[workout.exerciseId] = {
-        exerciseName: workout.exerciseName,
-        maxWeight: maxSetWeight,
-        maxVolume: workoutVolume,
-        date: workout.date,
-      }
-    }
-  })
-
-  res.json(Object.values(prs).sort((a, b) => b.maxWeight - a.maxWeight))
-}
-
-export function getWorkoutCalendar(req: Request, res: Response) {
-  const workoutDates = workoutLogsDB.map((w) => w.date)
-  const progressDates = dailyProgressDB.map((p) => p.date)
-
-  const calendar: { [date: string]: { hasWorkout: boolean; hasProgress: boolean } } = {}
-
-  workoutDates.forEach((d) => {
-    if (!calendar[d]) calendar[d] = { hasWorkout: false, hasProgress: false }
-    calendar[d].hasWorkout = true
-  })
-
-  progressDates.forEach((d) => {
-    if (!calendar[d]) calendar[d] = { hasWorkout: false, hasProgress: false }
-    calendar[d].hasProgress = true
-  })
-
-  res.json(calendar)
-}
-
-export function createWorkout(req: Request, res: Response) {
-  const newWorkout: WorkoutLog = {
-    id: Date.now().toString(),
-    date: req.body.date || new Date().toISOString().split('T')[0],
-    exerciseId: req.body.exerciseId,
-    exerciseName: req.body.exerciseName,
-    sets: req.body.sets || [],
-    duration: req.body.duration || 0,
-    notes: req.body.notes || '',
-    createdAt: new Date().toISOString(),
+    res.json(history)
+  } catch (error) {
+    res.status(500).json({ error: 'Error al procesar historial' })
   }
-  workoutLogsDB.push(newWorkout)
-  res.status(201).json(newWorkout)
 }
 
-export function updateWorkout(req: Request, res: Response) {
-  const index = workoutLogsDB.findIndex((w) => w.id === req.params.id)
-  if (index === -1) return res.status(404).json({ error: 'Entrenamiento no encontrado' })
-
-  workoutLogsDB[index] = { ...workoutLogsDB[index], ...req.body }
-  res.json(workoutLogsDB[index])
-}
-
-export function deleteWorkout(req: Request, res: Response) {
-  const index = workoutLogsDB.findIndex((w) => w.id === req.params.id)
-  if (index === -1) return res.status(404).json({ error: 'Entrenamiento no encontrado' })
-
-  const deleted = workoutLogsDB.splice(index, 1)[0]
-  res.json({ message: 'Entrenamiento eliminado', workout: deleted })
+// --- DELETE: Borrar entrenamiento ---
+export async function deleteWorkout(req: Request, res: Response) {
+  try {
+    // Si usas "onDelete: Cascade" en Prisma, borrará los sets automáticamente
+    const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id
+    await prisma.workoutLog.delete({
+      where: { id }
+    })
+    res.json({ message: 'Entrenamiento eliminado' })
+  } catch (error) {
+    res.status(404).json({ error: 'No encontrado' })
+  }
 }

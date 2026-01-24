@@ -1,12 +1,13 @@
 import { Request, Response } from 'express'
 import { BodyMeasurement } from '../interfaces/BodyMeasurement'
-import { bodyMeasurementsDB } from '../data/measurementsData'
-import { prisma } from '../scripts/migrate-data'
+
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient().bodyMeasurement
 
 export function getMeasurements(req: Request, res: Response) {
-  res.json(bodyMeasurementsDB)
+  res.json(prisma.findMany())
 }
-
 export function createMeasurement(req: Request, res: Response) {
   const newMeasurement: BodyMeasurement = {
     id: Date.now().toString(),
@@ -20,6 +21,14 @@ export function createMeasurement(req: Request, res: Response) {
     thighRight: req.body.thighRight || 0,
     createdAt: new Date().toISOString(),
   }
-  bodyMeasurementsDB.push(newMeasurement)
-  res.status(201).json(newMeasurement)
+  prisma.create({
+    data: newMeasurement
+  })
+    .then(createdMeasurement =>
+      res.status(201).json(createdMeasurement)
+    )
+    .catch(error =>
+      res.status(500).json({ error: error.message }
+      )
+    )
 }
