@@ -1,3 +1,5 @@
+
+/*
 import { Request, Response } from 'express'
 
 export function validateToken(req: Request, res: Response, next: Function) {
@@ -13,3 +15,4 @@ export function validateToken(req: Request, res: Response, next: Function) {
     req.body.token = token;
     next();
 }
+    */
