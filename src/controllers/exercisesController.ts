@@ -3,56 +3,61 @@ import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
-// --- GET: Listar con filtros ---
 export async function getExercises(req: Request, res: Response) {
   try {
-    const { muscle, difficulty, search } = req.query
+    const muscle = req.query.muscle as string | undefined
+    const difficulty = req.query.difficulty as string | undefined
+    const search = req.query.search as string | undefined
+    const category = req.query.category as string | undefined
 
-    // Construimos el objeto de filtros dinámicamente
     const where: any = {}
 
     if (muscle && muscle !== 'Todos') {
-      where.muscle = muscle as string
+      where.muscle = muscle
     }
+
     if (difficulty && difficulty !== 'Todos') {
-      where.difficulty = difficulty as string
+      where.difficulty = difficulty
     }
+
+    if (category) {
+      where.category = category
+    }
+
     if (search) {
       where.OR = [
-        { name: { contains: search as string, mode: 'insensitive' } },
-        { description: { contains: search as string, mode: 'insensitive' } },
+        { name: { contains: search, mode: 'insensitive' } },
+        { description: { contains: search, mode: 'insensitive' } }
       ]
     }
 
     const exercises = await prisma.exercise.findMany({ where })
     res.json(exercises)
-  } catch (error) {
+  } catch {
     res.status(500).json({ error: 'Error al obtener ejercicios' })
   }
 }
 
-// --- GET: Estadísticas ---
-export async function getStatsRequest(req: Request, res: Response) {
+export async function getExerciseStats(req: Request, res: Response) {
   try {
-    const exercises = await prisma.exercise.findMany()
+    const [byMuscle, byDifficulty, total] = await Promise.all([
+      prisma.exercise.groupBy({
+        by: ['muscle'],
+        _count: true
+      }),
+      prisma.exercise.groupBy({
+        by: ['difficulty'],
+        _count: true
+      }),
+      prisma.exercise.count()
+    ])
 
-    const byMuscle: Record<string, number> = {}
-    const byDifficulty: Record<string, number> = {}
-
-    exercises.forEach((ex) => {
-      if (ex.muscle) {
-        byMuscle[ex.muscle] = (byMuscle[ex.muscle] || 0) + 1
-      }
-      if (ex.difficulty) {
-        byDifficulty[ex.difficulty] = (byDifficulty[ex.difficulty] || 0) + 1
-      }
-    })
     res.json({
-      totalExercises: exercises.length,
+      totalExercises: total,
       byMuscle,
-      byDifficulty,
+      byDifficulty
     })
-  } catch (error) {
+  } catch {
     res.status(500).json({ error: 'Error al generar estadísticas' })
   }
 }

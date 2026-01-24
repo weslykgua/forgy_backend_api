@@ -1,145 +1,114 @@
-import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { Request, Response } from 'express'
+import { PrismaClient } from '@prisma/client'
 
-const prisma = new PrismaClient().routine
+const prisma = new PrismaClient()
 
-/**
- * GET /routines
- * Obtiene todas las rutinas con sus ejercicios
- */
 export async function getRoutines(req: Request, res: Response) {
   try {
-    const routines = await prisma.findMany({
-      orderBy: { createdAt: 'desc' },
-      include: { exercises: true }
-    });
+    const userId = req.query.userId as string | undefined
 
-    res.json(routines);
-  } catch (error) {
-    console.error('Error getting routines:', error);
-    res.status(500).json({ message: 'Error al obtener rutinas' });
-  }
-}
-
-/**
- * POST /routines
- * Crea una nueva rutina
- */
-export async function createRoutine(req: Request, res: Response) {
-  console.log("Entro a createRoutine");
-  
-  try {
-    const { name } = req.body;
-
-    if (!name) {
-      return res.status(400).json({ message: 'El nombre es obligatorio' });
-    }
-
-    const routine = await prisma.create({
-      data: { name }
-    });
-
-    res.status(201).json(routine);
-  } catch (error) {
-    console.error('Error creating routine:', error);
-    res.status(500).json({ message: 'Error al crear rutina' });
-  }
-}
-
-/**
- * POST /routines/:id/exercises
- * Agrega un ejercicio a una rutina
- */
-export async function addExerciseToRoutine(req: Request, res: Response) {
- /*try {
-    const { id } = req.params;
-    const { exerciseId } = req.body;
-
-    if (!exerciseId) {
-      return res.status(400).json({ message: 'exerciseId es obligatorio' });
-    }
-
-    const routine = await prisma.findUnique({
-      where: { id }
-    });
-
-    if (!routine) {
-      return res.status(404).json({ message: 'Rutina no encontrada' });
-    }
-
-    await prisma.update({
-      where: { id },
-      data: {
+    const routines = await prisma.routine.findMany({
+      where: userId ? { userId } : undefined,
+      include: {
         exercises: {
-          connect: { id: exerciseId }
+          include: { exercise: true },
+          orderBy: { order: 'asc' }
+        },
+        _count: {
+          select: { exercises: true, sessions: true }
         }
-      }
-    });
+      },
+      orderBy: { createdAt: 'desc' }
+    })
 
-    res.json({ message: 'Ejercicio agregado a la rutina' });
-  } catch (error) {
-    console.error('Error adding exercise to routine:', error);
-    res.status(500).json({ message: 'Error al agregar ejercicio' });
-  }*/
-}
-
-/**
- * DELETE /routines/:id
- * Elimina una rutina completa
- */
-export async function deleteRoutine(req: Request, res: Response) {
-  try {
-    const { id } = req.params;
-    const routineId = Array.isArray(id) ? id[0] : id;
-
-    const routine = await prisma.findUnique({
-      where: { id: routineId }
-    });
-
-    if (!routine) {
-      return res.status(404).json({ message: 'Rutina no encontrada' });
-    }
-
-    await prisma.delete({
-      where: { id: routineId }
-    });
-
-    res.json({ message: 'Rutina eliminada correctamente' });
-  } catch (error) {
-    console.error('Error deleting routine:', error);
-    res.status(500).json({ message: 'Error al eliminar rutina' });
+    res.json(routines)
+  } catch {
+    res.status(500).json({ error: 'Error al obtener rutinas' })
   }
 }
 
-/**
- * DELETE /routines/:id/exercises/:exerciseId
- * Quita un ejercicio de una rutina
- */
+export async function createRoutine(req: Request, res: Response) {
+  try {
+    const { name, userId, type = 'playlist', description, difficulty } = req.body
+
+    if (!name || !userId) {
+      return res.status(400).json({ error: 'name y userId son obligatorios' })
+    }
+
+    const routine = await prisma.routine.create({
+      data: { name, userId, type, description, difficulty }
+    })
+
+    res.status(201).json(routine)
+  } catch {
+    res.status(500).json({ error: 'Error al crear rutina' })
+  }
+}
+
+export async function updateRoutine(req: Request, res: Response) {
+  try {
+    const id = req.params.id as string
+    const { name, description, isFavorite, difficulty } = req.body
+
+    const routine = await prisma.routine.update({
+      where: { id },
+      data: { name, description, isFavorite, difficulty }
+    })
+
+    res.json(routine)
+  } catch {
+    res.status(404).json({ error: 'Rutina no encontrada' })
+  }
+}
+
+export async function addExerciseToRoutine(req: Request, res: Response) {
+  try {
+    const id = req.params.id as string
+    const { exerciseId, order, targetSets, targetReps, targetWeight, restTime, notes } = req.body
+
+    const routineExercise = await prisma.routineExercise.create({
+      data: {
+        routineId: id,
+        exerciseId,
+        order,
+        targetSets,
+        targetReps,
+        targetWeight,
+        restTime,
+        notes
+      }
+    })
+
+    res.json(routineExercise)
+  } catch {
+    res.status(400).json({ error: 'Error al agregar ejercicio' })
+  }
+}
+
 export async function removeExerciseFromRoutine(req: Request, res: Response) {
   try {
-    const { id, exerciseId } = req.params;
-    const routineId = Array.isArray(id) ? id[0] : id;
+    const id = req.params.id as string
+    const exerciseId = req.params.exerciseId as string
 
-    /*const routine = await prisma.findUnique({
-      where: { id: id }
-    });*
-
-    if (!routine) {
-      return res.status(404).json({ message: 'Rutina no encontrada' });
-    }
-
-    /*await prisma.update({
-      where: { id },
-      data: {
-        exercises: {
-          disconnect: { id: exerciseId }
-        }
+    await prisma.routineExercise.deleteMany({
+      where: {
+        routineId: id,
+        exerciseId
       }
-    });*/
+    })
 
-    res.json({ message: 'Ejercicio eliminado de la rutina' });
-  } catch (error) {
-    console.error('Error removing exercise from routine:', error);
-    res.status(500).json({ message: 'Error al quitar ejercicio' });
+    res.json({ message: 'Ejercicio eliminado de la rutina' })
+  } catch {
+    res.status(400).json({ error: 'Error al eliminar ejercicio' })
+  }
+}
+
+export async function deleteRoutine(req: Request, res: Response) {
+  try {
+    const id = req.params.id as string
+    await prisma.routine.delete({ where: { id } })
+    res.json({ message: 'Rutina eliminada' })
+  } catch {
+    res.status(404).json({ error: 'Rutina no encontrada' })
   }
 }

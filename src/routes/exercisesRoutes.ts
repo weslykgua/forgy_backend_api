@@ -1,22 +1,14 @@
+import { Router } from 'express'
 import {
   getExercises,
-  getIdRequest,
-  getStatsRequest,
-  createExercise,
-  updateExercise,
-  deleteExercise,
+  getExerciseStats
 } from '../controllers/exercisesController'
-import { Router } from 'express'
 
-export function getExercisesRoutes() {
+export function getExercisesRoutes(): Router {
   const router = Router()
 
   router.get('/', getExercises)
-  router.get('/stats', getStatsRequest)
-  router.get('/:id', getIdRequest)
-  router.post('/', createExercise)
-  router.put('/:id', updateExercise)
-  router.delete('/:id', deleteExercise)
+  router.get('/stats', getExerciseStats)
 
   return router
 }

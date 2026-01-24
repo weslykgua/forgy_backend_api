@@ -1,6 +1,6 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
+// ==========================
+// Prisma Configuration
+// ==========================
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,115 +10,313 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Exercise {
-  id           String       @id @default(uuid())
-  name         String
-  muscle       String
-  video        String?
-  description  String?
-  difficulty   String?
-  equipment    String?
-  instructions String[]
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
-  workoutLogs  WorkoutLog[]
-
-  @@index([muscle])
-  @@map("exercises")
-  routines Routine[] @relation("RoutineExercises")
-}
-
-model Routine {
-  id        String     @id @default(uuid())
-  name      String
-  exercises Exercise[] @relation("RoutineExercises")
-  createdAt DateTime   @default(now())
-}
-
-model BodyMeasurement {
-  id           String   @id @default(uuid())
-  date         String
-  chest        Float?
-  waist        Float?
-  hips         Float?
-  bicepLeft    Float?
-  bicepRight   Float?
-  thighLeft    Float?
-  thighRight   Float?
-  createdAt    DateTime @default(now())
-
-  @@map("body_measurements")
-}
-
-model WorkoutLog {
-  id           String   @id @default(uuid())
-  date         String
-  exerciseId   String
-  exerciseName String
-  sets         Json // Array de { reps, weight, completed }
-  duration     Int? // en minutos
-  notes        String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  exercise Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
-
-  @@index([date])
-  @@index([exerciseId])
-  @@map("workout_logs")
-}
-
-model DailyProgress {
-  id               String   @id @default(uuid())
-  date             String   @unique
-  weight           Float?
-  waterIntake      Int? // en ml
-  caloriesConsumed Int?
-  caloriesBurned   Int?
-  sleepHours       Float?
-  mood             String?
-  notes            String?
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-
-  @@index([date])
-  @@map("daily_progress")
-}
-
-// Modelos adicionales que podrías necesitar
-
+// ==========================
+// User
+// ==========================
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
   name      String?
   password  String
+  age       Int?
+  weight    Float?    // peso actual en kg
+  height    Float?    // altura en cm
+  gender    String?   // male, female, other
+  activityLevel String? // sedentary, light, moderate, active, very_active
+  fitnessGoal String?   // lose_weight, maintain, gain_muscle, improve_endurance
+
+  routines  Routine[]
+  sessions  TrainingSession[]
+  goals     Goal[]
+  streaks   WorkoutStreak[]
+  records   PersonalRecord[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("users")
 }
 
-model NutritionPlan {
+// ==========================
+// Exercise
+// ==========================
+model Exercise {
+  id           String   @id @default(uuid())
+  name         String
+  muscle       String   // chest, back, legs, shoulders, arms, core, cardio
+  video        String?
+  description  String?
+  difficulty   String?  // beginner, intermediate, advanced
+  equipment    String?  // bodyweight, dumbbells, barbell, machine, bands
+  instructions String[]
+  category     String?  // strength, cardio, flexibility, balance
+
+  workoutLogs  WorkoutLog[]
+  routines     RoutineExercise[]
+  records      PersonalRecord[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([muscle])
+  @@index([difficulty])
+  @@map("exercises")
+}
+
+// ==========================
+// Routine (Playlist / Workout / Template)
+// ==========================
+model Routine {
   id          String   @id @default(uuid())
   name        String
   description String?
-  meals       Json // Array de comidas del día
-  totalCalories Int?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  type        String   // playlist | workout | template
+  isFavorite  Boolean  @default(false)
+  isPublic    Boolean  @default(false)
+  difficulty  String?  // beginner, intermediate, advanced
+  estimatedDuration Int? // minutos estimados
 
-  @@map("nutrition_plans")
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  exercises   RoutineExercise[]
+  sessions    TrainingSession[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([type])
+  @@map("routines")
 }
 
-model Goal {
-  id          String   @id @default(uuid())
-  type        String // weight, muscle, endurance, etc.
-  target      Float
-  current     Float
-  deadline    DateTime?
-  achieved    Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+// ==========================
+// RoutineExercise (Many-to-Many con orden y parámetros)
+// ==========================
+model RoutineExercise {
+  id         String @id @default(uuid())
+  routineId  String
+  exerciseId String
+  order      Int
+  
+  // Parámetros sugeridos para el ejercicio en esta rutina
+  targetSets Int?
+  targetReps Int?
+  targetWeight Float?
+  restTime   Int?  // segundos de descanso
+  notes      String?
 
+  routine  Routine  @relation(fields: [routineId], references: [id], onDelete: Cascade)
+  exercise Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+
+  @@unique([routineId, order])
+  @@index([routineId])
+  @@map("routine_exercises")
+}
+
+// ==========================
+// Training Session (Sesión de Entreno)
+// ==========================
+model TrainingSession {
+  id         String   @id @default(uuid())
+  date       DateTime
+  duration   Int?     // minutos
+  totalVolume Float?  // kg totales levantados
+  caloriesBurned Int?
+  notes      String?
+  rating     Int?     // 1-5 estrellas
+  
+  userId     String
+  routineId  String?
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  routine Routine? @relation(fields: [routineId], references: [id])
+
+  workoutLogs WorkoutLog[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([date])
+  @@index([userId])
+  @@index([userId, date])
+  @@map("training_sessions")
+}
+
+// ==========================
+// Workout Log (Ejercicio realizado)
+// ==========================
+model WorkoutLog {
+  id              String   @id @default(uuid())
+  exerciseId      String
+  trainingSessionId String
+
+  sets            Json     // [{ reps, weight, completed, rpe? }]
+  duration        Int?     // minutos
+  notes           String?
+  completed       Boolean  @default(true)
+
+  exercise Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  session  TrainingSession @relation(fields: [trainingSessionId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([exerciseId])
+  @@index([trainingSessionId])
+  @@map("workout_logs")
+}
+
+// ==========================
+// Personal Records (PRs)
+// ==========================
+model PersonalRecord {
+  id          String   @id @default(uuid())
+  userId      String
+  exerciseId  String
+  
+  recordType  String   // max_weight, max_reps, max_volume, best_time
+  value       Float    // el valor del récord
+  reps        Int?     // repeticiones (para contexto de max_weight)
+  weight      Float?   // peso (para contexto de max_reps)
+  date        DateTime
+  notes       String?
+  
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exercise Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([exerciseId])
+  @@index([userId, exerciseId])
+  @@map("personal_records")
+}
+
+// ==========================
+// Workout Streak (Racha de entrenamiento)
+// ==========================
+model WorkoutStreak {
+  id            String   @id @default(uuid())
+  userId        String
+  
+  currentStreak Int      @default(0)  // días consecutivos actuales
+  longestStreak Int      @default(0)  // mejor racha histórica
+  lastWorkoutDate DateTime?
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId])
+  @@map("workout_streaks")
+}
+
+// ==========================
+// Daily Progress (Métricas diarias)
+// ==========================
+model DailyProgress {
+  id               String   @id @default(uuid())
+  date             DateTime @unique
+  userId           String?  // opcional para asociar al usuario
+  
+  weight           Float?
+  waterIntake      Int?     // ml
+  caloriesConsumed Int?
+  caloriesBurned   Int?
+  sleepHours       Float?
+  mood             String?  // great, good, okay, bad, terrible
+  energy           Int?     // 1-5
+  stress           Int?     // 1-5
+  notes            String?
+  
+  // Calculado automáticamente
+  workoutsCompleted Int?    // número de entrenamientos ese día
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([date])
+  @@index([userId])
+  @@map("daily_progress")
+}
+
+// ==========================
+// Body Measurements
+// ==========================
+model BodyMeasurement {
+  id         String   @id @default(uuid())
+  date       DateTime
+  userId     String?
+
+  weight     Float?
+  bodyFat    Float?   // porcentaje
+  chest      Float?   // cm
+  waist      Float?
+  hips       Float?
+  bicepLeft  Float?
+  bicepRight Float?
+  thighLeft  Float?
+  thighRight Float?
+  calves     Float?
+  neck       Float?
+  shoulders  Float?
+
+  createdAt DateTime @default(now())
+
+  @@index([date])
+  @@index([userId])
+  @@map("body_measurements")
+}
+
+// ==========================
+// Goals
+// ==========================
+model Goal {
+  id        String   @id @default(uuid())
+  type      String   // weight_loss, muscle_gain, strength, endurance, flexibility
+  target    Float
+  current   Float
+  unit      String?  // kg, lbs, reps, minutes
+  deadline  DateTime?
+  achieved  Boolean  @default(false)
+  priority  String?  // high, medium, low
+
+  userId String
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([achieved])
   @@map("goals")
+}
+
+// ==========================
+// AI Recommendations (Para IA)
+// ==========================
+model AIRecommendation {
+  id             String   @id @default(uuid())
+  userId         String
+  
+  type           String   // workout, nutrition, recovery, goal
+  title          String
+  description    String
+  priority       String   // high, medium, low
+  status         String   @default("pending") // pending, accepted, dismissed
+  
+  // Metadata para contexto
+  basedOn        Json?    // qué datos se usaron para generar
+  confidence     Float?   // 0-1, qué tan segura está la IA
+  
+  expiresAt      DateTime?
+  dismissedAt    DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([status])
+  @@index([userId, status])
+  @@map("ai_recommendations")
 }

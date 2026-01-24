@@ -1,34 +1,46 @@
 import { Request, Response } from 'express'
-import { BodyMeasurement } from '../interfaces/BodyMeasurement'
+import { PrismaClient } from '@prisma/client'
 
-import { PrismaClient } from '@prisma/client';
+const prisma = new PrismaClient()
 
-const prisma = new PrismaClient().bodyMeasurement
+export async function getMeasurements(req: Request, res: Response) {
+  try {
+    const userId = req.query.userId as string | undefined
 
-export function getMeasurements(req: Request, res: Response) {
-  res.json(prisma.findMany())
-}
-export function createMeasurement(req: Request, res: Response) {
-  const newMeasurement: BodyMeasurement = {
-    id: Date.now().toString(),
-    date: req.body.date || new Date().toISOString().split('T')[0],
-    chest: req.body.chest || 0,
-    waist: req.body.waist || 0,
-    hips: req.body.hips || 0,
-    bicepLeft: req.body.bicepLeft || 0,
-    bicepRight: req.body.bicepRight || 0,
-    thighLeft: req.body.thighLeft || 0,
-    thighRight: req.body.thighRight || 0,
-    createdAt: new Date().toISOString(),
+    const data = await prisma.bodyMeasurement.findMany({
+      where: userId ? { userId } : undefined,
+      orderBy: { date: 'desc' }
+    })
+    
+    res.json(data)
+  } catch {
+    res.status(500).json({ error: 'Error al obtener mediciones' })
   }
-  prisma.create({
-    data: newMeasurement
-  })
-    .then(createdMeasurement =>
-      res.status(201).json(createdMeasurement)
-    )
-    .catch(error =>
-      res.status(500).json({ error: error.message }
-      )
-    )
+}
+
+export async function createMeasurement(req: Request, res: Response) {
+  try {
+    const measurement = await prisma.bodyMeasurement.create({
+      data: {
+        date: new Date(req.body.date),
+        userId: req.body.userId,
+        weight: req.body.weight,
+        bodyFat: req.body.bodyFat,
+        chest: req.body.chest,
+        waist: req.body.waist,
+        hips: req.body.hips,
+        bicepLeft: req.body.bicepLeft,
+        bicepRight: req.body.bicepRight,
+        thighLeft: req.body.thighLeft,
+        thighRight: req.body.thighRight,
+        calves: req.body.calves,
+        neck: req.body.neck,
+        shoulders: req.body.shoulders
+      }
+    })
+
+    res.status(201).json(measurement)
+  } catch (error) {
+    res.status(400).json({ error: 'Error al guardar medición' })
+  }
 }
