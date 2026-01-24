@@ -7,6 +7,7 @@ import {
   addExerciseToRoutine,
   removeExerciseFromRoutine
 } from '../controllers/routinesController'
+import { validateToken } from '../controllers/authenticationController'
 
 export function getRoutinesRoutes(): Router {
   const router = Router()
@@ -23,7 +24,7 @@ export function getRoutinesRoutes(): Router {
    * Body: { name, userId, type?, description?, difficulty? }
    * Crea una nueva rutina/playlist
    */
-  router.post('/', createRoutine)
+  router.post('/', validateToken, createRoutine)
 
   /**
    * PUT /api/routines/:id

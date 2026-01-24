@@ -29,19 +29,29 @@ export async function getRoutines(req: Request, res: Response) {
 
 export async function createRoutine(req: Request, res: Response) {
   try {
-    const { name, userId, type = 'playlist', description, difficulty } = req.body
+    const { name, description, token } = req.body
 
-    if (!name || !userId) {
-      return res.status(400).json({ error: 'name y userId son obligatorios' })
+    if (!name) {
+      return res.status(400).json({ error: 'Nombre es obligatorios' })
     }
-
+    console.log("Rutina entro");
+    
     const routine = await prisma.routine.create({
-      data: { name, userId, type, description, difficulty }
+      data: {
+        name: name,
+        userId: token.userId,
+        type: "workout",
+        description: description
+        //difficulty: difficulty
+      }
     })
-
+    // ToDo convertir userId desde json web token
     res.status(201).json(routine)
-  } catch {
-    res.status(500).json({ error: 'Error al crear rutina' })
+  } catch (error: any) {
+    console.error(error)
+    res.status(500).json({ error: 'Error al crear rutina', details: error.message })
+    console.log("Rutina, error", error);
+    
   }
 }
 
