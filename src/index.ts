@@ -1,55 +1,104 @@
-import express, { Request, Response } from 'express';
-import cors from 'cors';
-import http from 'http';
-import { Server } from 'socket.io';
+import express, { Application, Request, Response } from 'express'
+import cors from 'cors'
+import dotenv from 'dotenv'
+import { createServer } from 'http'
+import { Server } from 'socket.io'
+import helmet from 'helmet'
+import compression from 'compression'
 
-// Routes
-import { getExercisesRoutes } from './routes/exercisesRoutes';
-import { getWorkoutsRoutes } from './routes/workoutsRoutes';
-import { getProgressRoutes } from './routes/progressRoutes';
-import { getMeasurementsRoutes } from './routes/measurementsRoutes';
+// Configuración de Prisma
+import { connectDB } from './config/database'
 
-// Data (para el log de inicio)
-import { exercisesDB } from './data/exercisesData';
+// Rutas
+import { getExercisesRoutes } from './routes/exercisesRoutes'
+import { getWorkoutsRoutes } from './routes/workoutsRoutes'
+import { getProgressRoutes } from './routes/progressRoutes'
+import { getRoutinesRoutes } from './routes/routinesRoutes'
+import { getAuthRoutes } from './routes/authRoutes'
 
-const app = express();
-const PORT = 3000;
+// ================= CONFIG =================
+dotenv.config()
 
-// Middleware
-app.use(cors());
-app.use(express.json());
+const app: Application = express()
+const httpServer = createServer(app)
 
-// Routes
+const io = new Server(httpServer, {
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+  },
+})
+
+const PORT = process.env.PORT || 3000
+
+// ================= MIDDLEWARES =================
+app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }))
+app.use(compression())
+app.use(cors())
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
+
+// ================= ROUTES =================
 app.get('/', (req: Request, res: Response) => {
-    res.send('🏋️ API Forgy - Plataforma de Ejercicios');
-});
+  res.json({
+    name: 'Forgy Backend API',
+    version: '1.0.0',
+    status: 'Running',
+  })
+})
 
-app.use('/exercises', getExercisesRoutes());
-app.use('/workouts', getWorkoutsRoutes());
-app.use('/progress', getProgressRoutes());
-app.use('/measurements', getMeasurementsRoutes());
+app.get('/health', (req: Request, res: Response) => {
+  res.json({
+    status: 'OK',
+    timestamp: new Date().toISOString(),
+  })
+})
 
-// Socket.IO
-const server = http.createServer(app);
-const io = new Server(server, {
-    cors: {
-        origin: "*",
-        methods: ["GET", "POST", "PUT", "DELETE"]
-    }
-});
+// ⚠️ IMPORTANTE: ejecutar las funciones
+app.use('/exercises', getExercisesRoutes())
+app.use('/routines', getRoutinesRoutes())
+app.use('/workouts', getWorkoutsRoutes())
+app.use('/progress', getProgressRoutes())
+app.use('/auth', getAuthRoutes())
 
+// ================= WEBSOCKET =================
 io.on('connection', (socket) => {
-    console.log('🔌 Cliente conectado:', socket.id);
-    socket.on('disconnect', () => {
-        console.log('🔌 Cliente desconectado:', socket.id);
-    });
-});
+  console.log(`✅ Cliente conectado: ${socket.id}`)
 
-// Exportar io para usar en controllers si se necesita
-export { io };
+  socket.on('disconnect', () => {
+    console.log(`❌ Cliente desconectado: ${socket.id}`)
+  })
+})
 
-// Start server
-server.listen(PORT, () => {
-    console.log(`🏋️ Servidor Forgy corriendo en http://localhost:${PORT}`);
-    console.log(`📊 ${exercisesDB.length} ejercicios cargados`);
-});
+// ================= ERROR HANDLERS =================
+
+// 404
+app.use((req: Request, res: Response) => {
+  res.status(404).json({
+    success: false,
+    message: 'Endpoint no encontrado',
+    path: req.path,
+  })
+})
+
+// Global error handler
+app.use(
+  (err: Error, req: Request, res: Response, _next: any) => {
+    console.error('Error:', err)
+
+    res.status(500).json({
+      success: false,
+      message: 'Error interno del servidor',
+      error:
+        process.env.NODE_ENV === 'development'
+          ? err.message
+          : undefined,
+    })
+  }
+)
+
+// ================= START SERVER =================
+httpServer.listen(PORT, async () => {
+  console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`)
+  await connectDB()
+})

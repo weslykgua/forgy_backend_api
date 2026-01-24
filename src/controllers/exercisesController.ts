@@ -1,80 +1,63 @@
-import { Exercise } from "../interfaces/Exercise"
-import { Request, Response } from 'express';
-import { exercisesDB } from "../data/exercisesData";
+import { Request, Response } from 'express'
+import { PrismaClient } from '@prisma/client'
 
-export function getExercises(req: Request, res: Response) {
-    const { muscle, difficulty, search } = req.query;
-    let filtered = [...exercisesDB];
+const prisma = new PrismaClient()
+
+export async function getExercises(req: Request, res: Response) {
+  try {
+    const muscle = req.query.muscle as string | undefined
+    const difficulty = req.query.difficulty as string | undefined
+    const search = req.query.search as string | undefined
+    const category = req.query.category as string | undefined
+
+    const where: any = {}
 
     if (muscle && muscle !== 'Todos') {
-        filtered = filtered.filter(ex => ex.muscle === muscle);
+      where.muscle = muscle
     }
+
     if (difficulty && difficulty !== 'Todos') {
-        filtered = filtered.filter(ex => ex.difficulty === difficulty);
+      where.difficulty = difficulty
     }
+
+    if (category) {
+      where.category = category
+    }
+
     if (search) {
-        const searchLower = (search as string).toLowerCase();
-        filtered = filtered.filter(ex =>
-            ex.name.toLowerCase().includes(searchLower) ||
-            ex.description.toLowerCase().includes(searchLower)
-        );
+      where.OR = [
+        { name: { contains: search, mode: 'insensitive' } },
+        { description: { contains: search, mode: 'insensitive' } }
+      ]
     }
-    res.json(filtered);
-}
-export function getStatsRequest(req: Request, res: Response) {
-    res.json(getStats());
-}
-export function getIdRequest(req: Request, res: Response) {
-    const exercise = exercisesDB.find(ex => ex.id === req.params.id);
-    if (!exercise) return res.status(404).json({ error: 'Ejercicio no encontrado' });
-    res.json(exercise);
+
+    const exercises = await prisma.exercise.findMany({ where })
+    res.json(exercises)
+  } catch {
+    res.status(500).json({ error: 'Error al obtener ejercicios' })
+  }
 }
 
-export function createExercise(req: Request, res: Response) {
-    const newExercise: Exercise = {
-        id: Date.now().toString(),
-        name: req.body.name,
-        muscle: req.body.muscle,
-        video: req.body.video || '',
-        description: req.body.description || '',
-        difficulty: req.body.difficulty || 'Principiante',
-        equipment: req.body.equipment || '',
-        instructions: req.body.instructions || [],
-        createdAt: new Date().toISOString()
-    };
-    exercisesDB.push(newExercise);
-    res.status(201).json(newExercise);
+export async function getExerciseStats(req: Request, res: Response) {
+  try {
+    const [byMuscle, byDifficulty, total] = await Promise.all([
+      prisma.exercise.groupBy({
+        by: ['muscle'],
+        _count: true
+      }),
+      prisma.exercise.groupBy({
+        by: ['difficulty'],
+        _count: true
+      }),
+      prisma.exercise.count()
+    ])
+
+    res.json({
+      totalExercises: total,
+      byMuscle,
+      byDifficulty
+    })
+  } catch {
+    res.status(500).json({ error: 'Error al generar estadísticas' })
+  }
 }
-
-export function updateExercise(req: Request, res: Response) {
-    const index = exercisesDB.findIndex(ex => ex.id === req.params.id);
-    if (index === -1) return res.status(404).json({ error: 'Ejercicio no encontrado' });
-
-    exercisesDB[index] = { ...exercisesDB[index], ...req.body };
-    res.json(exercisesDB[index]);
-}
-
-export function deleteExercise(req: Request, res: Response) {
-    const index = exercisesDB.findIndex(ex => ex.id === req.params.id);
-    if (index === -1) return res.status(404).json({ error: 'Ejercicio no encontrado' });
-
-    const deleted = exercisesDB.splice(index, 1)[0];
-    res.json({ message: 'Ejercicio eliminado', exercise: deleted });
-}
-
-function getStats() {
-    const byMuscle: { [key: string]: number } = {}
-    const byDifficulty: { [key: string]: number } = {}
-
-    exercisesDB.forEach(ex => {
-        byMuscle[ex.muscle] = (byMuscle[ex.muscle] || 0) + 1
-        byDifficulty[ex.difficulty] = (byDifficulty[ex.difficulty] || 0) + 1
-    });
-
-    return {
-        totalExercises: exercisesDB.length,
-        byMuscle,
-        byDifficulty
-    }
-}
-

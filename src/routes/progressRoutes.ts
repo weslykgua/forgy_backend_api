@@ -1,20 +1,36 @@
-import { Router } from 'express';
+import { Router } from 'express'
 import {
-    getProgress,
-    getProgressByDate,
-    getProgressStats,
-    createProgress,
-    deleteProgress
-} from '../controllers/progressController';
+  upsertProgress,
+  getProgressHistory
+} from '../controllers/progressController'
 
-export function getProgressRoutes() {
-    const router = Router();
+export function getProgressRoutes(): Router {
+  const router = Router()
+  /**
+   * POST /api/progress
+   * Body: {
+   *   date,
+   *   userId,
+   *   weight?, 
+   *   waterIntake?, 
+   *   caloriesConsumed?, 
+   *   caloriesBurned?,
+   *   sleepHours?, 
+   *   mood?, 
+   *   energy?, 
+   *   stress?, 
+   *   notes?
+   * }
+   * Crea o actualiza el progreso diario
+   */
+  router.post('/', upsertProgress)
 
-    router.get('/', getProgress);
-    router.get('/stats', getProgressStats);
-    router.get('/:date', getProgressByDate);
-    router.post('/', createProgress);
-    router.delete('/:id', deleteProgress);
+  /**
+   * GET /api/progress
+   * Query params: userId, days? (default: 30)
+   * Obtiene el historial de progreso diario
+   */
+  router.get('/', getProgressHistory)
 
-    return router;
+  return router
 }

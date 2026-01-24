@@ -1,11 +1,39 @@
-import { Router } from 'express';
-import { getMeasurements, createMeasurement } from '../controllers/measurementsController';
+import { Router } from 'express'
+import {
+  getMeasurements,
+  createMeasurement
+} from '../controllers/measurementsController'
 
-export function getMeasurementsRoutes() {
-    const router = Router();
+export function getMeasurementsRoutes(): Router {
+  const router = Router()
 
-    router.get('/', getMeasurements);
-    router.post('/', createMeasurement);
+  /**
+   * GET /api/measurements
+   * Query params: userId
+   * Obtiene todas las mediciones corporales
+   */
+  router.get('/', getMeasurements)
 
-    return router;
+  /**
+   * POST /api/measurements
+   * Body: {
+   *   date, 
+   *   userId,
+   *   weight?, 
+   *   bodyFat?, 
+   *   chest?, 
+   *   waist?, 
+   *   hips?,
+   *   bicepLeft?, 
+   *   bicepRight?, 
+   *   thighLeft?, 
+   *   thighRight?,
+   *   calves?, 
+   *   neck?, 
+   *   shoulders?
+   * }
+   * Registra una nueva medición corporal
+   */
+  router.post('/', createMeasurement)
+  return router
 }

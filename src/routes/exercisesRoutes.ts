@@ -1,16 +1,14 @@
-import { getExercises, getIdRequest, getStatsRequest, createExercise, updateExercise, deleteExercise } from "../controllers/exercisesController";
-import { Router } from 'express';
+import { Router } from 'express'
+import {
+  getExercises,
+  getExerciseStats
+} from '../controllers/exercisesController'
 
+export function getExercisesRoutes(): Router {
+  const router = Router()
 
-export function getExercisesRoutes() {
-    const router = Router()
+  router.get('/', getExercises)
+  router.get('/stats', getExerciseStats)
 
-    router.get('/', getExercises)
-    router.get('/stats', getStatsRequest);
-    router.get('/:id', getIdRequest);
-    router.post('/', createExercise);
-    router.put('/:id', updateExercise);
-    router.delete('/:id', deleteExercise);
-
-    return router
+  return router
 }
