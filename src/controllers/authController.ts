@@ -1,7 +1,17 @@
 import { Request, Response } from 'express'
 import { PrismaClient } from '@prisma/client'
+import bcrypt from 'bcryptjs'
+import jwt from 'jsonwebtoken'
 
 const prisma = new PrismaClient()
+const JWT_SECRET = process.env.JWT_SECRET || 'forgy-secret-key-change-in-production'
+
+interface JWTPayload {
+  userId: string
+  email: string
+  from: string
+  until: string
+}
 
 export async function register(req: Request, res: Response) {
   try {
@@ -26,8 +36,12 @@ export async function register(req: Request, res: Response) {
       return res.status(409).json({ error: 'El email ya esta registrado' })
     }
 
+    const saltRounds = Number(process.env.BCRYPT_SALT_ROUNDS ?? 10)
+    const safeSaltRounds = Number.isFinite(saltRounds) && saltRounds > 0 ? saltRounds : 10
+    const hashedPassword = await bcrypt.hash(password, safeSaltRounds)
+
     const user = await prisma.user.create({
-      data: { email, password, name },
+      data: { email, password: hashedPassword, name },
       select: {
         id: true,
         email: true,
@@ -36,7 +50,25 @@ export async function register(req: Request, res: Response) {
       },
     })
 
-    return res.status(201).json({ user })
+    const now = new Date()
+    const expiresAt = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
+    const tokenPayload: JWTPayload = {
+      userId: user.id,
+      email: user.email,
+      from: now.toISOString(),
+      until: expiresAt.toISOString(),
+    }
+    const token = jwt.sign(tokenPayload, JWT_SECRET, { expiresIn: '7d' })
+
+    return res.status(201).json({
+      user,
+      token,
+      tokenData: {
+        userId: user.id,
+        from: now.toISOString(),
+        until: expiresAt.toISOString(),
+      },
+    })
   } catch (error) {
     console.error('Error en register:', error)
     return res.status(500).json({ error: 'Error al registrar usuario' })
@@ -67,12 +99,35 @@ export async function login(req: Request, res: Response) {
       },
     })
 
-    if (!user || user.password !== password) {
+    if (!user) {
       return res.status(401).json({ error: 'Credenciales invalidas' })
     }
 
+    const isValid = await bcrypt.compare(password, user.password)
+    if (!isValid) {
+      return res.status(401).json({ error: 'Credenciales invalidas' })
+    }
+
+    const now = new Date()
+    const expiresAt = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
+    const tokenPayload: JWTPayload = {
+      userId: user.id,
+      email: user.email,
+      from: now.toISOString(),
+      until: expiresAt.toISOString(),
+    }
+    const token = jwt.sign(tokenPayload, JWT_SECRET, { expiresIn: '7d' })
+
     const { password: _password, ...safeUser } = user
-    return res.json({ user: safeUser })
+    return res.json({
+      user: safeUser,
+      token,
+      tokenData: {
+        userId: user.id,
+        from: now.toISOString(),
+        until: expiresAt.toISOString(),
+      },
+    })
   } catch (error) {
     console.error('Error en login:', error)
     return res.status(500).json({ error: 'Error al iniciar sesion' })
