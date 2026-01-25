@@ -5,7 +5,8 @@ const prisma = new PrismaClient()
 
 export async function upsertProgress(req: Request, res: Response) {
   try {
-    const { date, userId, ...data } = req.body
+    const { date, ...data } = req.body
+    const userId = req.body.token?.userId
 
     const progress = await prisma.dailyProgress.upsert({
       where: { date: new Date(date) },
@@ -25,7 +26,7 @@ export async function upsertProgress(req: Request, res: Response) {
 
 export async function getProgressHistory(req: Request, res: Response) {
   try {
-    const userId = req.query.userId as string | undefined
+    const userId = req.body.token?.userId as string
     const days = Number(req.query.days) || 30
     
     const startDate = new Date()
@@ -33,7 +34,7 @@ export async function getProgressHistory(req: Request, res: Response) {
 
     const progress = await prisma.dailyProgress.findMany({
       where: {
-        userId: userId || undefined,
+        userId,
         date: { gte: startDate }
       },
       orderBy: { date: 'asc' }

@@ -11,14 +11,11 @@ const prisma = new PrismaClient()
  */
 export async function getGoals(req: Request, res: Response) {
   try {
-    const userId = req.query.userId as string | undefined
+    const userId = req.body.token.userId as string
     const achieved = req.query.achieved as string | undefined
 
     const where: any = {}
-    
-    if (userId) {
-      where.userId = userId
-    }
+    where.userId = userId
 
     if (achieved !== undefined) {
       where.achieved = achieved === 'true'
@@ -46,7 +43,7 @@ export async function getGoals(req: Request, res: Response) {
 export async function createGoal(req: Request, res: Response) {
   try {
     const { 
-      userId, 
+      token,
       type, 
       target, 
       current, 
@@ -55,7 +52,7 @@ export async function createGoal(req: Request, res: Response) {
       priority 
     } = req.body
 
-    if (!userId || !type || target === undefined || current === undefined) {
+    if (!token.userId || !type || target === undefined || current === undefined) {
       return res.status(400).json({ 
         error: 'userId, type, target y current son obligatorios' 
       })
@@ -63,7 +60,7 @@ export async function createGoal(req: Request, res: Response) {
 
     const goal = await prisma.goal.create({
       data: {
-        userId,
+        userId: token.userId,
         type,
         target,
         current,
@@ -131,7 +128,7 @@ export async function deleteGoal(req: Request, res: Response) {
  */
 export async function getGoalsProgress(req: Request, res: Response) {
   try {
-    const userId = req.params.userId as string
+    const userId = req.body.token.userId as string
 
     const goals = await prisma.goal.findMany({
       where: {

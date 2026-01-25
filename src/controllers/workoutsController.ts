@@ -7,7 +7,8 @@ const prisma = new PrismaClient()
 
 export async function createWorkout(req: Request, res: Response) {
   try {
-    const { userId, routineId, duration, workouts, rating, notes } = req.body
+    const { routineId, duration, workouts, rating, notes } = req.body
+    const userId = req.body.token.userId
 
     // Calcular volumen total
     let totalVolume = 0
@@ -71,11 +72,11 @@ export async function createWorkout(req: Request, res: Response) {
 
 export async function getWorkoutHistory(req: Request, res: Response) {
   try {
-    const userId = req.query.userId as string | undefined
+    const userId = req.body.token.userId as string
     const limit = Number(req.query.limit) || 10
 
     const sessions = await prisma.trainingSession.findMany({
-      where: userId ? { userId } : undefined,
+      where: { userId },
       include: {
         workoutLogs: { include: { exercise: true } },
         routine: true
@@ -106,7 +107,7 @@ export async function getWorkoutHistory(req: Request, res: Response) {
 
 export async function getWorkoutStreak(req: Request, res: Response) {
   try {
-    const userId = req.params.userId as string
+    const userId = req.body.token.userId as string
 
     const streak = await prisma.workoutStreak.findUnique({
       where: { userId }
@@ -120,7 +121,7 @@ export async function getWorkoutStreak(req: Request, res: Response) {
 
 export async function getPersonalRecords(req: Request, res: Response) {
   try {
-    const userId = req.params.userId as string
+    const userId = req.body.token.userId as string
     const exerciseId = req.query.exerciseId as string | undefined
 
     const where: any = { userId }

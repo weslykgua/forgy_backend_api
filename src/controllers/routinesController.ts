@@ -5,10 +5,10 @@ const prisma = new PrismaClient()
 
 export async function getRoutines(req: Request, res: Response) {
   try {
-    const userId = req.query.userId as string | undefined
+    const userId = req.body.token?.userId as string
 
     const routines = await prisma.routine.findMany({
-      where: userId ? { userId } : undefined,
+      where: { userId },
       include: {
         exercises: {
           include: { exercise: true },
@@ -58,7 +58,15 @@ export async function createRoutine(req: Request, res: Response) {
 export async function updateRoutine(req: Request, res: Response) {
   try {
     const id = req.params.id as string
-    const { name, description, isFavorite, difficulty } = req.body
+    const { name, description, isFavorite, difficulty, token } = req.body
+
+    const existingRoutine = await prisma.routine.findUnique({ where: { id } })
+    if (!existingRoutine) {
+      return res.status(404).json({ error: 'Rutina no encontrada' })
+    }
+    if (existingRoutine.userId !== token.userId) {
+      return res.status(403).json({ error: 'No tienes permiso para editar esta rutina' })
+    }
 
     const routine = await prisma.routine.update({
       where: { id },
@@ -66,8 +74,9 @@ export async function updateRoutine(req: Request, res: Response) {
     })
 
     res.json(routine)
-  } catch {
-    res.status(404).json({ error: 'Rutina no encontrada' })
+  } catch (error) {
+    console.error('Error al actualizar rutina:', error)
+    res.status(500).json({ error: 'Error interno al actualizar la rutina' })
   }
 }
 
@@ -116,9 +125,20 @@ export async function removeExerciseFromRoutine(req: Request, res: Response) {
 export async function deleteRoutine(req: Request, res: Response) {
   try {
     const id = req.params.id as string
+    const userId = req.body.token.userId
+
+    const routine = await prisma.routine.findUnique({ where: { id } })
+    if (!routine) {
+      return res.status(404).json({ error: 'Rutina no encontrada' })
+    }
+    if (routine.userId !== userId) {
+      return res.status(403).json({ error: 'No tienes permiso para eliminar esta rutina' })
+    }
+
     await prisma.routine.delete({ where: { id } })
     res.json({ message: 'Rutina eliminada' })
-  } catch {
-    res.status(404).json({ error: 'Rutina no encontrada' })
+  } catch (error) {
+    console.error('Error al eliminar rutina:', error)
+    res.status(500).json({ error: 'Error interno al eliminar la rutina' })
   }
 }
