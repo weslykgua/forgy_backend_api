@@ -5,12 +5,12 @@ import {
   getWorkoutStreak,
   getPersonalRecords
 } from '../controllers/workoutsController'
-import { validateToken } from '../controllers/authenticationController'
+import { optionalToken, validateToken } from '../controllers/authenticationController'
 
 export function getWorkoutsRoutes() {
   const router = Router()
 
-  router.use(validateToken)
+  router.use(optionalToken)
 
   router.post('/', createWorkout)
   router.get('/history', getWorkoutHistory)

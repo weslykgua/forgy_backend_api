@@ -4,12 +4,12 @@ import {
   getRecommendations,
   updateRecommendationStatus
 } from '../controllers/aiController'
-import { validateToken } from '../controllers/authenticationController'
+import { optionalToken, validateToken } from '../controllers/authenticationController'
 
 export function getAIRoutes() {
   const router = Router()
 
-  router.use(validateToken)
+  router.use(optionalToken)
 
   /**
    * POST /api/ai/recommendations/:userId

@@ -6,13 +6,13 @@ import {
   deleteAccount,
   getUserStats 
 } from '../controllers/userController'
-import { validateToken } from '../controllers/authenticationController'
+import { optionalToken, validateToken } from '../controllers/authenticationController'
 
 export function getUserRoutes() {
   const router = Router()
 
   // Todas las rutas requieren autenticación
-  router.use(validateToken)
+  router.use(optionalToken)
 
   /**
    * GET /api/user/profile

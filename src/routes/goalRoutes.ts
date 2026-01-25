@@ -1,11 +1,11 @@
 import { Router } from 'express'
 import { getGoals, createGoal, updateGoal, deleteGoal } from '../controllers/goalController'
-import { validateToken } from '../controllers/authenticationController'
+import { optionalToken, validateToken } from '../controllers/authenticationController'
 
 export function getGoalRoutes() {
   const router = Router()
 
-  router.use(validateToken)
+  router.use(optionalToken)
 
   router.get('/', getGoals)
   router.post('/', createGoal)

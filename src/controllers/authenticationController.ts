@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express'
 import jwt from 'jsonwebtoken'
 
-const JWT_SECRET = process.env.JWT_SECRET || 'forgy-secret-key-change-in-production'
+const JWT_SECRET = process.env.JWT_SECRET || 'forgy-super-secret-key-for-dev'
 
 interface TokenData {
   userId: string

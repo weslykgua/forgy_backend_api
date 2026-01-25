@@ -7,12 +7,12 @@ import {
   addExerciseToRoutine,
   removeExerciseFromRoutine
 } from '../controllers/routinesController'
-import { validateToken } from '../controllers/authenticationController'
+import { optionalToken, validateToken } from '../controllers/authenticationController'
 export function getRoutinesRoutes() {
   const router = Router()
 
   // Proteger todas las rutas
-  router.use(validateToken)
+  router.use(optionalToken)
 
   router.get('/', getRoutines)
   router.post('/', createRoutine)

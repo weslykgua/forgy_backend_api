@@ -28,7 +28,7 @@ export async function getProgressHistory(req: Request, res: Response) {
   try {
     const userId = req.body.token?.userId as string
     const days = Number(req.query.days) || 30
-    
+
     const startDate = new Date()
     startDate.setDate(startDate.getDate() - days)
 
