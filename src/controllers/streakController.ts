@@ -1,8 +1,10 @@
-import { Request, Response } from 'express'
 import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
+/**
+ * Actualiza la racha de entrenamiento del usuario
+ */
 export async function updateWorkoutStreak(userId: string) {
   const today = new Date()
   today.setHours(0, 0, 0, 0)
@@ -65,19 +67,5 @@ export async function updateWorkoutStreak(userId: string) {
         }
       })
     }
-  }
-}
-
-export async function getWorkoutStreak(req: Request, res: Response) {
-  try {
-    const userId = req.params.userId as string
-
-    const streak = await prisma.workoutStreak.findUnique({
-      where: { userId }
-    })
-
-    res.json(streak || { currentStreak: 0, longestStreak: 0 })
-  } catch {
-    res.status(500).json({ error: 'Error al obtener racha' })
   }
 }

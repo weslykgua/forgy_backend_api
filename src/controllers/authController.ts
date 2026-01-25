@@ -13,17 +13,24 @@ interface JWTPayload {
   until: string
 }
 
+/**
+ * Registra un nuevo usuario
+ */
 export async function register(req: Request, res: Response) {
   try {
-    const email =
-      typeof req.body.email === 'string' ? req.body.email.trim() : ''
-    const password =
-      typeof req.body.password === 'string' ? req.body.password : ''
+    const email = typeof req.body.email === 'string' ? req.body.email.trim() : ''
+    const password = typeof req.body.password === 'string' ? req.body.password : ''
     const name = typeof req.body.name === 'string' ? req.body.name.trim() : ''
 
     if (!email || !password || !name) {
       return res.status(400).json({
         error: 'Email, password y name son requeridos',
+      })
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({
+        error: 'La contraseña debe tener al menos 6 caracteres',
       })
     }
 
@@ -33,7 +40,7 @@ export async function register(req: Request, res: Response) {
     })
 
     if (existingUser) {
-      return res.status(409).json({ error: 'El email ya esta registrado' })
+      return res.status(409).json({ error: 'El email ya está registrado' })
     }
 
     const saltRounds = Number(process.env.BCRYPT_SALT_ROUNDS ?? 10)
@@ -50,6 +57,15 @@ export async function register(req: Request, res: Response) {
       },
     })
 
+    // Crear racha inicial
+    await prisma.workoutStreak.create({
+      data: {
+        userId: user.id,
+        currentStreak: 0,
+        longestStreak: 0,
+      }
+    })
+
     const now = new Date()
     const expiresAt = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
     const tokenPayload: JWTPayload = {
@@ -61,6 +77,7 @@ export async function register(req: Request, res: Response) {
     const token = jwt.sign(tokenPayload, JWT_SECRET, { expiresIn: '7d' })
 
     return res.status(201).json({
+      message: 'Usuario registrado exitosamente',
       user,
       token,
       tokenData: {
@@ -75,12 +92,13 @@ export async function register(req: Request, res: Response) {
   }
 }
 
+/**
+ * Inicia sesión
+ */
 export async function login(req: Request, res: Response) {
   try {
-    const email =
-      typeof req.body.email === 'string' ? req.body.email.trim() : ''
-    const password =
-      typeof req.body.password === 'string' ? req.body.password : ''
+    const email = typeof req.body.email === 'string' ? req.body.email.trim() : ''
+    const password = typeof req.body.password === 'string' ? req.body.password : ''
 
     if (!email || !password) {
       return res.status(400).json({
@@ -95,17 +113,23 @@ export async function login(req: Request, res: Response) {
         email: true,
         name: true,
         password: true,
+        age: true,
+        weight: true,
+        height: true,
+        gender: true,
+        activityLevel: true,
+        fitnessGoal: true,
         createdAt: true,
       },
     })
 
     if (!user) {
-      return res.status(401).json({ error: 'Credenciales invalidas' })
+      return res.status(401).json({ error: 'Credenciales inválidas' })
     }
 
     const isValid = await bcrypt.compare(password, user.password)
     if (!isValid) {
-      return res.status(401).json({ error: 'Credenciales invalidas' })
+      return res.status(401).json({ error: 'Credenciales inválidas' })
     }
 
     const now = new Date()
@@ -120,6 +144,7 @@ export async function login(req: Request, res: Response) {
 
     const { password: _password, ...safeUser } = user
     return res.json({
+      message: 'Inicio de sesión exitoso',
       user: safeUser,
       token,
       tokenData: {
@@ -130,6 +155,6 @@ export async function login(req: Request, res: Response) {
     })
   } catch (error) {
     console.error('Error en login:', error)
-    return res.status(500).json({ error: 'Error al iniciar sesion' })
+    return res.status(500).json({ error: 'Error al iniciar sesión' })
   }
 }

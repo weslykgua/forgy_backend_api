@@ -54,32 +54,34 @@ export async function createWorkout(req: Request, res: Response) {
   } catch (error) {
     console.error(error)
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      // Foreign key constraint failed (e.g., userId or routineId does not exist)
       if (error.code === 'P2003') {
-        const field = error.meta?.field_name;
+        const field = error.meta?.field_name
         return res.status(400).json({
-          error: `Error de referencia inválida`,
+          error: 'Error de referencia inválida',
           details: `El ID proporcionado para '${field}' no existe.`
-        });
+        })
       }
     }
-    // Generic error
-    res.status(400).json({ error: 'Error al crear entrenamiento', details: error instanceof Error ? error.message : String(error) })
+    res.status(400).json({ 
+      error: 'Error al crear entrenamiento', 
+      details: error instanceof Error ? error.message : String(error) 
+    })
   }
 }
 
 export async function getWorkoutHistory(req: Request, res: Response) {
   try {
-    const { userId, limit = 10 } = req.query
+    const userId = req.query.userId as string | undefined
+    const limit = Number(req.query.limit) || 10
 
     const sessions = await prisma.trainingSession.findMany({
-      where: userId ? { userId: String(userId) } : undefined,
+      where: userId ? { userId } : undefined,
       include: {
         workoutLogs: { include: { exercise: true } },
         routine: true
       },
       orderBy: { date: 'desc' },
-      take: Number(limit)
+      take: limit
     })
 
     const history = sessions.map((session: any) => ({
@@ -99,5 +101,58 @@ export async function getWorkoutHistory(req: Request, res: Response) {
     res.json(history)
   } catch {
     res.status(500).json({ error: 'Error al obtener historial' })
+  }
+}
+
+export async function getWorkoutStreak(req: Request, res: Response) {
+  try {
+    const userId = req.params.userId as string
+
+    const streak = await prisma.workoutStreak.findUnique({
+      where: { userId }
+    })
+
+    res.json(streak || { currentStreak: 0, longestStreak: 0 })
+  } catch {
+    res.status(500).json({ error: 'Error al obtener racha' })
+  }
+}
+
+export async function getPersonalRecords(req: Request, res: Response) {
+  try {
+    const userId = req.params.userId as string
+    const exerciseId = req.query.exerciseId as string | undefined
+
+    const where: any = { userId }
+    if (exerciseId) {
+      where.exerciseId = exerciseId
+    }
+
+    const records = await prisma.personalRecord.findMany({
+      where,
+      include: { exercise: true },
+      orderBy: { date: 'desc' }
+    })
+
+    // Agrupar por ejercicio y tipo
+    const grouped = records.reduce((acc: any, record: any) => {
+      const key = record.exerciseId
+      if (!acc[key]) {
+        acc[key] = {
+          exerciseName: record.exercise.name,
+          records: {}
+        }
+      }
+      
+      if (!acc[key].records[record.recordType] || record.value > acc[key].records[record.recordType].value) {
+        acc[key].records[record.recordType] = record
+      }
+      
+      return acc
+    }, {})
+
+    res.json(grouped)
+  } catch {
+    res.status(500).json({ error: 'Error al obtener récords' })
   }
 }

@@ -1,45 +1,51 @@
 import { Router } from 'express'
-import {
-  register,
-  login,
-  getProfile,
-  updateProfile,
-  changePassword,
-  deleteAccount
+import { 
+  getProfile, 
+  updateProfile, 
+  changePassword, 
+  deleteAccount,
+  getUserStats 
 } from '../controllers/userController'
 import { validateToken } from '../controllers/authenticationController'
 
-const router = Router()
+export function getUserRoutes() {
+  const router = Router()
 
-/**
- * POST /api/auth/register
- */
-router.post('/register', register)
+  // Todas las rutas requieren autenticación
+  router.use(validateToken)
 
-/**
- * POST /api/auth/login
- */
-router.post('/login', login)
+  /**
+   * GET /api/user/profile
+   * Headers: Authorization: {token}
+   */
+  router.get('/profile', getProfile)
 
-/**
- * GET /api/auth/profile
- * Headers: Authorization: {token} o Authorization: Bearer {token}
- */
-router.get('/profile', validateToken, getProfile)
+  /**
+   * PUT /api/user/profile
+   * Headers: Authorization: {token}
+   * Body: { name?, age?, weight?, height?, gender?, activityLevel?, fitnessGoal? }
+   */
+  router.put('/profile', updateProfile)
 
-/**
- * PUT /api/auth/profile
- */
-router.put('/profile', validateToken, updateProfile)
+  /**
+   * PUT /api/user/change-password
+   * Headers: Authorization: {token}
+   * Body: { currentPassword, newPassword }
+   */
+  router.put('/change-password', changePassword)
 
-/**
- * PUT /api/auth/change-password
- */
-router.put('/change-password', validateToken, changePassword)
+  /**
+   * DELETE /api/user/account
+   * Headers: Authorization: {token}
+   * Body: { password }
+   */
+  router.delete('/account', deleteAccount)
 
-/**
- * DELETE /api/auth/account
- */
-router.delete('/account', validateToken, deleteAccount)
+  /**
+   * GET /api/user/stats
+   * Headers: Authorization: {token}
+   */
+  router.get('/stats', getUserStats)
 
-export default router
+  return router
+}

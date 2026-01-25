@@ -1,8 +1,10 @@
-import { Request, Response } from 'express'
 import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
+/**
+ * Verifica y actualiza los récords personales del usuario
+ */
 export async function checkAndUpdateRecords(userId: string, workouts: any[]) {
   for (const workout of workouts) {
     const { exerciseId, sets } = workout
@@ -106,44 +108,5 @@ export async function checkAndUpdateRecords(userId: string, workouts: any[]) {
         })
       }
     }
-  }
-}
-
-export async function getPersonalRecords(req: Request, res: Response) {
-  try {
-    const userId = req.params.userId as string
-    const exerciseId = req.query.exerciseId as string | undefined
-
-    const where: any = { userId }
-    if (exerciseId) {
-      where.exerciseId = exerciseId
-    }
-
-    const records = await prisma.personalRecord.findMany({
-      where,
-      include: { exercise: true },
-      orderBy: { date: 'desc' }
-    })
-
-    // Agrupar por ejercicio y tipo
-    const grouped = records.reduce((acc: any, record: any) => {
-      const key = record.exerciseId
-      if (!acc[key]) {
-        acc[key] = {
-          exerciseName: record.exercise.name,
-          records: {}
-        }
-      }
-      
-      if (!acc[key].records[record.recordType] || record.value > acc[key].records[record.recordType].value) {
-        acc[key].records[record.recordType] = record
-      }
-      
-      return acc
-    }, {})
-
-    res.json(grouped)
-  } catch {
-    res.status(500).json({ error: 'Error al obtener récords' })
   }
 }

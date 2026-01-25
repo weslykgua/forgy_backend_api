@@ -1,48 +1,16 @@
 import { Router } from 'express'
-import {
-    getGoals,
-    createGoal,
-    updateGoal,
-    deleteGoal
-} from '../controllers/goalController'
+import { getGoals, createGoal, updateGoal, deleteGoal } from '../controllers/goalController'
+import { validateToken } from '../controllers/authenticationController'
 
-export function getExercisesRoutes(): Router {
-    const router = Router()
+export function getGoalRoutes() {
+  const router = Router()
 
-    /**
-     * GET /api/goals
-     * Query params: userId, achieved? (true/false)
-     * Obtiene las metas del usuario
-     */
-    router.get('/', getGoals)
+  router.use(validateToken)
 
-    /**
-     * POST /api/goals
-     * Body: {
-     *   userId,
-     *   type, (weight_loss, muscle_gain, strength, endurance, flexibility)
-     *   target,
-     *   current,
-     *   unit?,
-     *   deadline?,
-     *   priority?
-     * }
-     * Crea una nueva meta
-     */
-    router.post('/', createGoal)
+  router.get('/', getGoals)
+  router.post('/', createGoal)
+  router.put('/:id', updateGoal)
+  router.delete('/:id', deleteGoal)
 
-    /**
-     * PUT /api/goals/:id
-     * Body: { current?, target?, deadline?, achieved?, priority? }
-     * Actualiza una meta existente
-     */
-    router.put('/:id', updateGoal)
-
-    /**
-     * DELETE /api/goals/:id
-     * Elimina una meta
-     */
-    router.delete('/:id', deleteGoal)
-
-    return router
+  return router
 }

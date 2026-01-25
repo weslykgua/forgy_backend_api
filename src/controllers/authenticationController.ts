@@ -12,11 +12,10 @@ interface TokenData {
 
 /**
  * Middleware para validar token JWT
- * Compatible con tu estructura existente
+ * Agrega los datos del token a req.body.token
  */
 export function validateToken(req: Request, res: Response, next: NextFunction) {
   try {
-    // Obtener token del header
     const authHeader = req.headers.authorization as string | undefined
 
     if (!authHeader) {
@@ -39,9 +38,7 @@ export function validateToken(req: Request, res: Response, next: NextFunction) {
       return res.status(401).json({ error: 'Token expirado' })
     }
 
-    console.log('Token validado:', decoded)
-
-    // Agregar token decodificado al body (compatible con tu estructura)
+    // Agregar token decodificado al body
     req.body.token = {
       userId: decoded.userId,
       email: decoded.email,

@@ -72,7 +72,7 @@ export async function getRecommendations(req: Request, res: Response) {
         ]
       },
       orderBy: [
-        { priority: 'asc' }, // high primero
+        { priority: 'asc' },
         { createdAt: 'desc' }
       ]
     })
@@ -167,7 +167,7 @@ async function generateWorkoutRecommendations(data: UserData) {
       priority: 'high',
       basedOn: { workoutCount: data.recentWorkouts.length, period: '30 days' },
       confidence: 0.9,
-      expiresAt: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000) // 7 días
+      expiresAt: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
     })
   }
 
@@ -180,20 +180,23 @@ async function generateWorkoutRecommendations(data: UserData) {
     }, {})
 
   const totalExercises = Object.values(muscleGroups).reduce((a: any, b: any) => a + b, 0) as number
-  const undertrainedMuscles = Object.entries(muscleGroups)
-    .filter(([_, count]) => (count as number) / totalExercises < 0.1)
-    .map(([muscle]) => muscle)
+  
+  if (totalExercises > 0) {
+    const undertrainedMuscles = Object.entries(muscleGroups)
+      .filter(([_, count]) => (count as number) / totalExercises < 0.1)
+      .map(([muscle]) => muscle)
 
-  if (undertrainedMuscles.length > 0) {
-    recommendations.push({
-      type: 'workout',
-      title: 'Equilibra tu entrenamiento',
-      description: `Has estado entrenando poco estos grupos musculares: ${undertrainedMuscles.join(', ')}. Considera agregar ejercicios para estos músculos.`,
-      priority: 'medium',
-      basedOn: { muscleDistribution: muscleGroups },
-      confidence: 0.85,
-      expiresAt: new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000)
-    })
+    if (undertrainedMuscles.length > 0) {
+      recommendations.push({
+        type: 'workout',
+        title: 'Equilibra tu entrenamiento',
+        description: `Has estado entrenando poco estos grupos musculares: ${undertrainedMuscles.join(', ')}. Considera agregar ejercicios para estos músculos.`,
+        priority: 'medium',
+        basedOn: { muscleDistribution: muscleGroups },
+        confidence: 0.85,
+        expiresAt: new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000)
+      })
+    }
   }
 
   // 3. Recomendar progresión
@@ -255,20 +258,22 @@ async function generateRecoveryRecommendations(data: UserData) {
   })
 
   if (lastWeekWorkouts.length >= 6) {
-    const avgRating = lastWeekWorkouts
-      .filter(w => w.rating)
-      .reduce((sum, w) => sum + w.rating, 0) / lastWeekWorkouts.length
+    const ratingsWithValue = lastWeekWorkouts.filter(w => w.rating)
+    
+    if (ratingsWithValue.length > 0) {
+      const avgRating = ratingsWithValue.reduce((sum, w) => sum + w.rating, 0) / ratingsWithValue.length
 
-    if (avgRating < 3) {
-      recommendations.push({
-        type: 'recovery',
-        title: 'Considera un día de descanso',
-        description: 'Has entrenado mucho esta semana y tus valoraciones han sido bajas. Tu cuerpo podría necesitar recuperación.',
-        priority: 'high',
-        basedOn: { weeklyWorkouts: lastWeekWorkouts.length, avgRating },
-        confidence: 0.85,
-        expiresAt: new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000)
-      })
+      if (avgRating < 3) {
+        recommendations.push({
+          type: 'recovery',
+          title: 'Considera un día de descanso',
+          description: 'Has entrenado mucho esta semana y tus valoraciones han sido bajas. Tu cuerpo podría necesitar recuperación.',
+          priority: 'high',
+          basedOn: { weeklyWorkouts: lastWeekWorkouts.length, avgRating },
+          confidence: 0.85,
+          expiresAt: new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000)
+        })
+      }
     }
   }
 

@@ -1,35 +1,13 @@
 import { Router } from 'express'
-import {
-  upsertProgress,
-  getProgressHistory
-} from '../controllers/progressController'
+import { upsertProgress, getProgressHistory } from '../controllers/progressController'
+import { validateToken } from '../controllers/authenticationController'
 
-export function getProgressRoutes(): Router {
+export function getProgressRoutes() {
   const router = Router()
-  /**
-   * POST /api/progress
-   * Body: {
-   *   date,
-   *   userId,
-   *   weight?, 
-   *   waterIntake?, 
-   *   caloriesConsumed?, 
-   *   caloriesBurned?,
-   *   sleepHours?, 
-   *   mood?, 
-   *   energy?, 
-   *   stress?, 
-   *   notes?
-   * }
-   * Crea o actualiza el progreso diario
-   */
-  router.post('/', upsertProgress)
 
-  /**
-   * GET /api/progress
-   * Query params: userId, days? (default: 30)
-   * Obtiene el historial de progreso diario
-   */
+  router.use(validateToken)
+
+  router.post('/', upsertProgress)
   router.get('/', getProgressHistory)
 
   return router
