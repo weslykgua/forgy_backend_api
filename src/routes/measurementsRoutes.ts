@@ -5,7 +5,7 @@ import { optionalToken, validateToken } from '../controllers/authenticationContr
 export function getMeasurementRoutes() {
   const router = Router()
 
-  router.use(optionalToken)
+  router.use(validateToken)
 
   /**
    * GET /api/measurements

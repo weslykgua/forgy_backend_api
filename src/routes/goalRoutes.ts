@@ -5,7 +5,7 @@ import { optionalToken, validateToken } from '../controllers/authenticationContr
 export function getGoalRoutes() {
   const router = Router()
 
-  router.use(optionalToken)
+  router.use(validateToken)
 
   router.get('/', getGoals)
   router.post('/', createGoal)

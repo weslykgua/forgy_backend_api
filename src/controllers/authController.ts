@@ -2,7 +2,7 @@ import { Request, Response } from 'express'
 import { PrismaClient } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
-import { JWTPayload } from '../interfaces/JwtPayload'
+import { JWTPayload } from '../interfaces/JwtPayloadInterface'
 
 const prisma = new PrismaClient()
 // DIAGNÓSTICO: Asegúrate de que esta clave sea la misma en `authenticationController.ts`

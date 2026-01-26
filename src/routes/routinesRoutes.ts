@@ -12,7 +12,7 @@ export function getRoutinesRoutes() {
   const router = Router()
 
   // Proteger todas las rutas
-  router.use(optionalToken)
+  router.use(validateToken)
 
   router.get('/', getRoutines)
   router.post('/', createRoutine)

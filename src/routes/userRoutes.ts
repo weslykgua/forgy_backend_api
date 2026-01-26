@@ -12,7 +12,7 @@ export function getUserRoutes() {
   const router = Router()
 
   // Todas las rutas requieren autenticación
-  router.use(optionalToken)
+  router.use(validateToken)
 
   /**
    * GET /api/user/profile

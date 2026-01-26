@@ -9,20 +9,20 @@ import { optionalToken, validateToken } from '../controllers/authenticationContr
 export function getAIRoutes() {
   const router = Router()
 
-  router.use(optionalToken)
+  router.use(validateToken)
 
   /**
-   * POST /api/ai/recommendations/:userId
+   * POST /api/ai/recommendations
    * Headers: Authorization: {token}
    */
-  router.post('/recommendations/:userId', generateRecommendations)
+  router.post('/recommendations', generateRecommendations)
 
   /**
-   * GET /api/ai/recommendations/:userId
+   * GET /api/ai/recommendations
    * Headers: Authorization: {token}
    * Query params: status? (pending, accepted, dismissed)
    */
-  router.get('/recommendations/:userId', getRecommendations)
+  router.get('/recommendations', getRecommendations)
 
   /**
    * PATCH /api/ai/recommendations/:id

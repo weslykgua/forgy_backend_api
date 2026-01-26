@@ -5,7 +5,7 @@ const prisma = new PrismaClient()
 
 export async function getRoutines(req: Request, res: Response) {
   try {
-    const userId = req.body.token?.userId as string
+    const userId = (req as any).token?.userId as string
 
     // Si no hay usuario autenticado, no se deben devolver rutinas privadas.
     if (!userId) {
@@ -35,10 +35,11 @@ export async function getRoutines(req: Request, res: Response) {
 
 export async function createRoutine(req: Request, res: Response) {
   try {
-    const { name, description, token } = req.body
+    const { name, description } = req.body
+    const token = (req as any).token
 
     if (!token?.userId) {
-      return res.status(401).json
+      return res.status(401).json({ error: 'Autenticación requerida para crear rutinas' })
     }
 
     if (!name) {
@@ -63,7 +64,8 @@ export async function createRoutine(req: Request, res: Response) {
 export async function updateRoutine(req: Request, res: Response) {
   try {
     const id = req.params.id as string
-    const { name, description, isFavorite, difficulty, exercises, token } = req.body
+    const { name, description, isFavorite, difficulty, exercises } = req.body
+    const token = (req as any).token
 
     if (!token?.userId) {
       return res.status(401).json({ error: 'Autenticación requerida para editar esta rutina' })
@@ -117,7 +119,8 @@ export async function updateRoutine(req: Request, res: Response) {
 export async function addExerciseToRoutine(req: Request, res: Response) {
   try {
     const id = req.params.id as string
-    const { exerciseId, order, targetSets, targetReps, targetWeight, restTime, notes, token } = req.body
+    const { exerciseId, order, targetSets, targetReps, targetWeight, restTime, notes } = req.body
+    const token = (req as any).token
 
     if (!token?.userId) {
       return res.status(401).json({ error: 'Autenticación requerida' })
@@ -152,7 +155,7 @@ export async function removeExerciseFromRoutine(req: Request, res: Response) {
   try {
     const id = req.params.id as string
     const exerciseId = req.params.exerciseId as string
-    const userId = req.body.token?.userId
+    const userId = (req as any).token?.userId
 
     if (!userId) {
       return res.status(401).json({ error: 'Autenticación requerida' })
@@ -180,7 +183,7 @@ export async function removeExerciseFromRoutine(req: Request, res: Response) {
 export async function deleteRoutine(req: Request, res: Response) {
   try {
     const id = req.params.id as string
-    const userId = req.body.token?.userId
+    const userId = (req as any).token?.userId
 
     if (!userId) {
       return res.status(401).json({ error: 'Autenticación requerida' })

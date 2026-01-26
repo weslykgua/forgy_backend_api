@@ -9,7 +9,7 @@ const prisma = new PrismaClient()
  */
 export async function getProfile(req: Request, res: Response) {
   try {
-    const userId = req.body.token.userId as string
+    const userId = (req as any).token.userId as string
 
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -52,15 +52,15 @@ export async function getProfile(req: Request, res: Response) {
  */
 export async function updateProfile(req: Request, res: Response) {
   try {
-    const userId = req.body.token.userId as string
-    const { 
-      name, 
-      age, 
-      weight, 
-      height, 
-      gender, 
-      activityLevel, 
-      fitnessGoal 
+    const userId = (req as any).token.userId as string
+    const {
+      name,
+      age,
+      weight,
+      height,
+      gender,
+      activityLevel,
+      fitnessGoal
     } = req.body
 
     const data: any = {}
@@ -104,19 +104,19 @@ export async function updateProfile(req: Request, res: Response) {
  */
 export async function changePassword(req: Request, res: Response) {
   try {
-    const userId = req.body.token.userId as string
+    const userId = (req as any).token.userId as string
     const currentPassword = typeof req.body.currentPassword === 'string' ? req.body.currentPassword : ''
     const newPassword = typeof req.body.newPassword === 'string' ? req.body.newPassword : ''
 
     if (!currentPassword || !newPassword) {
-      return res.status(400).json({ 
-        error: 'Contraseña actual y nueva son obligatorias' 
+      return res.status(400).json({
+        error: 'Contraseña actual y nueva son obligatorias'
       })
     }
 
     if (newPassword.length < 6) {
-      return res.status(400).json({ 
-        error: 'La nueva contraseña debe tener al menos 6 caracteres' 
+      return res.status(400).json({
+        error: 'La nueva contraseña debe tener al menos 6 caracteres'
       })
     }
 
@@ -132,8 +132,8 @@ export async function changePassword(req: Request, res: Response) {
     const isPasswordValid = await bcrypt.compare(currentPassword, user.password)
 
     if (!isPasswordValid) {
-      return res.status(401).json({ 
-        error: 'La contraseña actual es incorrecta' 
+      return res.status(401).json({
+        error: 'La contraseña actual es incorrecta'
       })
     }
 
@@ -158,12 +158,12 @@ export async function changePassword(req: Request, res: Response) {
  */
 export async function deleteAccount(req: Request, res: Response) {
   try {
-    const userId = req.body.token.userId as string
+    const userId = (req as any).token.userId as string
     const password = typeof req.body.password === 'string' ? req.body.password : ''
 
     if (!password) {
-      return res.status(400).json({ 
-        error: 'Se requiere la contraseña para eliminar la cuenta' 
+      return res.status(400).json({
+        error: 'Se requiere la contraseña para eliminar la cuenta'
       })
     }
 
@@ -179,8 +179,8 @@ export async function deleteAccount(req: Request, res: Response) {
     const isPasswordValid = await bcrypt.compare(password, user.password)
 
     if (!isPasswordValid) {
-      return res.status(401).json({ 
-        error: 'Contraseña incorrecta' 
+      return res.status(401).json({
+        error: 'Contraseña incorrecta'
       })
     }
 
@@ -201,7 +201,7 @@ export async function deleteAccount(req: Request, res: Response) {
  */
 export async function getUserStats(req: Request, res: Response) {
   try {
-    const userId = req.body.token.userId as string
+    const userId = (req as any).token.userId as string
 
     const [user, streak, recentWorkouts, goals] = await Promise.all([
       prisma.user.findUnique({
