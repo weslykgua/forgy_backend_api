@@ -2,16 +2,11 @@ import { Request, Response } from 'express'
 import { PrismaClient } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
+import { JWTPayload } from '../interfaces/JwtPayloadInterface'
 
 const prisma = new PrismaClient()
-const JWT_SECRET = process.env.JWT_SECRET || 'forgy-secret-key-change-in-production'
-
-interface JWTPayload {
-  userId: string
-  email: string
-  from: string
-  until: string
-}
+// DIAGNÓSTICO: Asegúrate de que esta clave sea la misma en `authenticationController.ts`
+const JWT_SECRET = process.env.JWT_SECRET || 'forgy-super-secret-key-for-dev'
 
 /**
  * Registra un nuevo usuario

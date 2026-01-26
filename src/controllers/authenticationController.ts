@@ -1,14 +1,9 @@
 import { Request, Response, NextFunction } from 'express'
 import jwt from 'jsonwebtoken'
+import { TokenData } from '../interfaces/TokenData'
 
-const JWT_SECRET = process.env.JWT_SECRET || 'forgy-secret-key-change-in-production'
+const JWT_SECRET = process.env.JWT_SECRET || 'forgy-super-secret-key-for-dev'
 
-interface TokenData {
-  userId: string
-  email: string
-  from: string
-  until: string
-}
 
 /**
  * Middleware para validar token JWT
@@ -23,8 +18,8 @@ export function validateToken(req: Request, res: Response, next: NextFunction) {
     }
 
     // Extraer el token (Bearer TOKEN o solo TOKEN)
-    const token = authHeader.startsWith('Bearer ') 
-      ? authHeader.substring(7) 
+    const token = authHeader.startsWith('Bearer ')
+      ? authHeader.substring(7)
       : authHeader
 
     // Verificar y decodificar token
@@ -38,14 +33,14 @@ export function validateToken(req: Request, res: Response, next: NextFunction) {
       return res.status(401).json({ error: 'Token expirado' })
     }
 
-    // Agregar token decodificado al body
-    req.body.token = {
+    // Adjuntar datos del token a la petición para uso en los controladores.
+    // Usamos `(req as any)` para extender el objeto Request sin modificar los tipos globales.
+    (req as any).token = {
       userId: decoded.userId,
       email: decoded.email,
       from: decoded.from,
       until: decoded.until
     }
-
     next()
   } catch (error) {
     console.error('Error validando token:', error)
@@ -61,14 +56,14 @@ export function optionalToken(req: Request, res: Response, next: NextFunction) {
     const authHeader = req.headers.authorization as string | undefined
 
     if (authHeader) {
-      const token = authHeader.startsWith('Bearer ') 
-        ? authHeader.substring(7) 
+      const token = authHeader.startsWith('Bearer ')
+        ? authHeader.substring(7)
         : authHeader
 
       try {
         const decoded = jwt.verify(token, JWT_SECRET) as TokenData
-        
-        req.body.token = {
+
+        (req as any).token = {
           userId: decoded.userId,
           email: decoded.email,
           from: decoded.from,

@@ -4,7 +4,7 @@ import {
   getRecommendations,
   updateRecommendationStatus
 } from '../controllers/aiController'
-import { validateToken } from '../controllers/authenticationController'
+import { optionalToken, validateToken } from '../controllers/authenticationController'
 
 export function getAIRoutes() {
   const router = Router()
@@ -12,17 +12,17 @@ export function getAIRoutes() {
   router.use(validateToken)
 
   /**
-   * POST /api/ai/recommendations/:userId
+   * POST /api/ai/recommendations
    * Headers: Authorization: {token}
    */
-  router.post('/recommendations/:userId', generateRecommendations)
+  router.post('/recommendations', generateRecommendations)
 
   /**
-   * GET /api/ai/recommendations/:userId
+   * GET /api/ai/recommendations
    * Headers: Authorization: {token}
    * Query params: status? (pending, accepted, dismissed)
    */
-  router.get('/recommendations/:userId', getRecommendations)
+  router.get('/recommendations', getRecommendations)
 
   /**
    * PATCH /api/ai/recommendations/:id

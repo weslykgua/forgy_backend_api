@@ -6,7 +6,7 @@ import {
   deleteAccount,
   getUserStats 
 } from '../controllers/userController'
-import { validateToken } from '../controllers/authenticationController'
+import { optionalToken, validateToken } from '../controllers/authenticationController'
 
 export function getUserRoutes() {
   const router = Router()

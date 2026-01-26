@@ -18,7 +18,7 @@ interface UserData {
  */
 export async function generateRecommendations(req: Request, res: Response) {
   try {
-    const userId = req.params.userId as string
+    const userId = (req as any).token.userId as string
 
     // Obtener todos los datos relevantes del usuario
     const userData = await gatherUserData(userId)
@@ -59,7 +59,7 @@ export async function generateRecommendations(req: Request, res: Response) {
  */
 export async function getRecommendations(req: Request, res: Response) {
   try {
-    const userId = req.params.userId as string
+    const userId = (req as any).token.userId as string
     const status = (req.query.status as string) || 'pending'
 
     const recommendations = await prisma.aIRecommendation.findMany({
@@ -180,7 +180,7 @@ async function generateWorkoutRecommendations(data: UserData) {
     }, {})
 
   const totalExercises = Object.values(muscleGroups).reduce((a: any, b: any) => a + b, 0) as number
-  
+
   if (totalExercises > 0) {
     const undertrainedMuscles = Object.entries(muscleGroups)
       .filter(([_, count]) => (count as number) / totalExercises < 0.1)
@@ -259,7 +259,7 @@ async function generateRecoveryRecommendations(data: UserData) {
 
   if (lastWeekWorkouts.length >= 6) {
     const ratingsWithValue = lastWeekWorkouts.filter(w => w.rating)
-    
+
     if (ratingsWithValue.length > 0) {
       const avgRating = ratingsWithValue.reduce((sum, w) => sum + w.rating, 0) / ratingsWithValue.length
 
@@ -307,7 +307,7 @@ async function generateGoalRecommendations(data: UserData) {
 
   for (const goal of data.goals) {
     const progress = ((goal.current / goal.target) * 100).toFixed(1)
-    const daysLeft = goal.deadline 
+    const daysLeft = goal.deadline
       ? Math.ceil((new Date(goal.deadline).getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
       : null
 

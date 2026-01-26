@@ -1,13 +1,13 @@
 import { Router } from 'express'
-import { getDashboardMetrics } from '../controllers/dashboardController'
-import { validateToken } from '../controllers/authenticationController'
+import { getDashboardMetrics } from '../controllers/metricsController'
+import { optionalToken, validateToken } from '../controllers/authenticationController'
 
 export function getDashboardRoutes() {
   const router = Router()
 
   router.use(validateToken)
 
-  router.get('/:userId', getDashboardMetrics)
+  router.get('/', getDashboardMetrics)
 
   return router
 }

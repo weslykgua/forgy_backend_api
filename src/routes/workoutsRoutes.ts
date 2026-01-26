@@ -5,7 +5,7 @@ import {
   getWorkoutStreak,
   getPersonalRecords
 } from '../controllers/workoutsController'
-import { validateToken } from '../controllers/authenticationController'
+import { optionalToken, validateToken } from '../controllers/authenticationController'
 
 export function getWorkoutsRoutes() {
   const router = Router()
@@ -15,7 +15,7 @@ export function getWorkoutsRoutes() {
   router.post('/', createWorkout)
   router.get('/history', getWorkoutHistory)
   router.get('/streak/:userId', getWorkoutStreak)
-  router.get('/records/:userId', getPersonalRecords)
+  router.get('/prs', getPersonalRecords)
 
   return router
 }

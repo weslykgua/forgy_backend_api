@@ -1,4 +1,4 @@
-import { WorkoutLog } from '../interfaces/WorkoutLog'
+import { WorkoutLog } from '../interfaces/WorkoutLogInterface'
 
 export const workoutLogsDB: WorkoutLog[] = [
   {

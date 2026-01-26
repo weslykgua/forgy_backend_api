@@ -8,7 +8,7 @@ const prisma = new PrismaClient()
 export async function createWorkout(req: Request, res: Response) {
   try {
     const { routineId, duration, workouts, rating, notes } = req.body
-    const userId = req.body.token.userId
+    const userId = (req as any).token.userId
 
     // Calcular volumen total
     let totalVolume = 0
@@ -63,16 +63,16 @@ export async function createWorkout(req: Request, res: Response) {
         })
       }
     }
-    res.status(400).json({ 
-      error: 'Error al crear entrenamiento', 
-      details: error instanceof Error ? error.message : String(error) 
+    res.status(400).json({
+      error: 'Error al crear entrenamiento',
+      details: error instanceof Error ? error.message : String(error)
     })
   }
 }
 
 export async function getWorkoutHistory(req: Request, res: Response) {
   try {
-    const userId = req.body.token.userId as string
+    const userId = (req as any).token.userId as string
     const limit = Number(req.query.limit) || 10
 
     const sessions = await prisma.trainingSession.findMany({
@@ -107,7 +107,7 @@ export async function getWorkoutHistory(req: Request, res: Response) {
 
 export async function getWorkoutStreak(req: Request, res: Response) {
   try {
-    const userId = req.body.token.userId as string
+    const userId = (req as any).token.userId as string
 
     const streak = await prisma.workoutStreak.findUnique({
       where: { userId }
@@ -121,7 +121,7 @@ export async function getWorkoutStreak(req: Request, res: Response) {
 
 export async function getPersonalRecords(req: Request, res: Response) {
   try {
-    const userId = req.body.token.userId as string
+    const userId = (req as any).token.userId as string
     const exerciseId = req.query.exerciseId as string | undefined
 
     const where: any = { userId }
@@ -144,11 +144,11 @@ export async function getPersonalRecords(req: Request, res: Response) {
           records: {}
         }
       }
-      
+
       if (!acc[key].records[record.recordType] || record.value > acc[key].records[record.recordType].value) {
         acc[key].records[record.recordType] = record
       }
-      
+
       return acc
     }, {})
 
