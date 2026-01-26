@@ -46,6 +46,17 @@ export async function createRoutine(req: Request, res: Response) {
       return res.status(400).json({ error: 'El nombre de la rutina es obligatorio' })
     }
 
+    // AGREGA ESTA VALIDACIÓN: Verifica que el usuario existe
+    const userExists = await prisma.user.findUnique({
+      where: { id: token.userId },
+      select: { id: true }
+    })
+
+    if (!userExists) {
+      console.error('Usuario no encontrado en BD:', token.userId)
+      return res.status(401).json({ error: 'Usuario no válido' })
+    }
+
     const routine = await prisma.routine.create({
       data: {
         name: name,
@@ -54,9 +65,10 @@ export async function createRoutine(req: Request, res: Response) {
         description: description
       }
     })
+    
     res.status(201).json(routine)
   } catch (error: any) {
-    console.error(error)
+    console.error('Error completo:', error)
     res.status(500).json({ error: 'Error al crear rutina', details: error.message })
   }
 }

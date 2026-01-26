@@ -28,8 +28,8 @@ export function validateToken(req: Request, res: Response, next: NextFunction) {
       ? authHeader.substring(7)
       : authHeader
 
-    // Verificar y decodificar token
-    const decoded = jwt.verify(token, JWT_SECRET) as TokenData
+    // Verificar y decodificar token - USA JWTPayload en lugar de TokenData
+    const decoded = jwt.verify(token, JWT_SECRET) as JWTPayload
 
     // Verificar si el token ha expirado
     const now = new Date()

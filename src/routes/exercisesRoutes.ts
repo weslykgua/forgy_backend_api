@@ -3,7 +3,7 @@ import {
   getExercises,
   getExerciseStats
 } from '../controllers/exercisesController'
-import { validateAdminToken } from '../controllers/authenticationController'
+//import { validateAdminToken } from '../controllers/authenticationController'
 
 export function getExercisesRoutes(): Router {
   const router = Router()
