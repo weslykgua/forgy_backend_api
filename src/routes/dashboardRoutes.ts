@@ -7,7 +7,7 @@ export function getDashboardRoutes() {
 
   router.use(validateToken)
 
-  router.get('/', getDashboardMetrics)
+  router.get('/', validateToken, getDashboardMetrics)
 
   return router
 }

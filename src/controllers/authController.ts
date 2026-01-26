@@ -75,11 +75,6 @@ export async function register(req: Request, res: Response) {
       message: 'Usuario registrado exitosamente',
       user,
       token,
-      tokenData: {
-        userId: user.id,
-        from: now.toISOString(),
-        until: expiresAt.toISOString(),
-      },
     })
   } catch (error) {
     console.error('Error en register:', error)
