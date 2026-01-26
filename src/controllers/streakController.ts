@@ -25,6 +25,26 @@ export async function updateWorkoutStreak(userId: string) {
     return streak
   }
 
+/**
+ * Obtiene la racha de entrenamiento de un usuario.
+ */
+export async function getWorkoutStreak(userId: string) {
+  const streak = await prisma.workoutStreak.findUnique({
+    where: { userId },
+    select: {
+      currentStreak: true,
+      longestStreak: true,
+      lastWorkoutDate: true,
+    }
+  });
+
+  if (!streak) {
+    return { currentStreak: 0, longestStreak: 0, lastWorkoutDate: null };
+  }
+
+  return streak;
+}
+
   const lastWorkout = streak.lastWorkoutDate ? new Date(streak.lastWorkoutDate) : null
   if (lastWorkout) {
     lastWorkout.setHours(0, 0, 0, 0)
