@@ -217,7 +217,7 @@ model WorkoutStreak {
 // ==========================
 model DailyProgress {
   id               String   @id @default(uuid())
-  date             DateTime @unique
+  date             DateTime
   userId           String?  // opcional para asociar al usuario
   
   weight           Float?
@@ -238,6 +238,7 @@ model DailyProgress {
 
   @@index([date])
   @@index([userId])
+  @@unique([userId, date])
   @@map("daily_progress")
 }
 
