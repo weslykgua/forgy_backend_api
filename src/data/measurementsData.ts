@@ -1,3 +1,3 @@
-import { BodyMeasurement } from '../interfaces/BodyMeasurement'
+import { BodyMeasurement } from '../interfaces/BodyMeasurementInterface'
 
 export const bodyMeasurementsDB: BodyMeasurement[] = []

@@ -5,13 +5,13 @@ const prisma = new PrismaClient()
 
 export async function getMeasurements(req: Request, res: Response) {
   try {
-    const userId = req.query.userId as string | undefined
+    const userId = (req as any).token.userId as string
 
     const data = await prisma.bodyMeasurement.findMany({
-      where: userId ? { userId } : undefined,
+      where: { userId },
       orderBy: { date: 'desc' }
     })
-    
+
     res.json(data)
   } catch {
     res.status(500).json({ error: 'Error al obtener mediciones' })

@@ -5,7 +5,7 @@ const prisma = new PrismaClient()
 
 export async function getDashboardMetrics(req: Request, res: Response) {
   try {
-    const userId = req.params.userId as string // ✅ Asegura que es string
+    const userId = (req as any).token.userId as string
     const thirtyDaysAgo = new Date()
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
 

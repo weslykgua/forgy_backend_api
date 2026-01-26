@@ -15,6 +15,11 @@ import { getWorkoutsRoutes } from './routes/workoutsRoutes'
 import { getProgressRoutes } from './routes/progressRoutes'
 import { getRoutinesRoutes } from './routes/routinesRoutes'
 import { getAuthRoutes } from './routes/authRoutes'
+import { getUserRoutes } from './routes/userRoutes'
+import { getMeasurementRoutes } from './routes/measurementsRoutes'
+import { getDashboardRoutes } from './routes/dashboardRoutes'
+import { getGoalRoutes } from './routes/goalRoutes'
+import { getAIRoutes } from './routes/aiRoutes'
 
 // ================= CONFIG =================
 dotenv.config()
@@ -54,12 +59,19 @@ app.get('/health', (req: Request, res: Response) => {
   })
 })
 
-// ⚠️ IMPORTANTE: ejecutar las funciones
-app.use('/exercises', getExercisesRoutes())
-app.use('/routines', getRoutinesRoutes())
-app.use('/workouts', getWorkoutsRoutes())
-app.use('/progress', getProgressRoutes())
-app.use('/auth', getAuthRoutes())
+// ========== RUTAS PÚBLICAS ==========
+app.use('/api/auth', getAuthRoutes())
+app.use('/api/exercises', getExercisesRoutes())
+
+// ========== RUTAS PROTEGIDAS ==========
+app.use('/api/user', getUserRoutes())
+app.use('/api/routines', getRoutinesRoutes())
+app.use('/api/workouts', getWorkoutsRoutes())
+app.use('/api/progress', getProgressRoutes())
+app.use('/api/measurements', getMeasurementRoutes())
+app.use('/api/dashboard', getDashboardRoutes())
+app.use('/api/goals', getGoalRoutes())
+app.use('/api/ai', getAIRoutes())
 
 // ================= WEBSOCKET =================
 io.on('connection', (socket) => {
