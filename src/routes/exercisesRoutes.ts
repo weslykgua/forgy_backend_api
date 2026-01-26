@@ -10,7 +10,7 @@ export function getExercisesRoutes(): Router {
 
   router.get('/', getExercises)
   router.get('/stats', getExerciseStats)
-  router.post('/', validateAdminToken, setExercise)
+  //router.post('/', validateAdminToken, setExercise)
 
   return router
 }

@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import { getDashboardMetrics } from '../controllers/metricsController'
-import { optionalToken, validateToken } from '../controllers/authenticationController'
+import { validateToken } from '../controllers/authenticationController'
 
 export function getDashboardRoutes() {
   const router = Router()

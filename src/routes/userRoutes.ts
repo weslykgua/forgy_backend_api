@@ -5,7 +5,7 @@ import {
   changePassword, 
   deleteAccount, 
 } from '../controllers/userController'
-import { optionalToken, validateToken } from '../controllers/authenticationController'
+import { validateToken } from '../controllers/authenticationController'
 
 export function getUserRoutes() {
   const router = Router()

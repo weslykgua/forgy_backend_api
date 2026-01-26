@@ -7,7 +7,7 @@ import {
   addExerciseToRoutine,
   removeExerciseFromRoutine
 } from '../controllers/routinesController'
-import { optionalToken, validateToken } from '../controllers/authenticationController'
+import { validateToken } from '../controllers/authenticationController'
 export function getRoutinesRoutes() {
   const router = Router()
 

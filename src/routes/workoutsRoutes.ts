@@ -5,7 +5,7 @@ import {
   getWorkoutStreak,
   getPersonalRecords
 } from '../controllers/workoutsController'
-import { optionalToken, validateToken } from '../controllers/authenticationController'
+import { validateToken } from '../controllers/authenticationController'
 
 export function getWorkoutsRoutes() {
   const router = Router()
