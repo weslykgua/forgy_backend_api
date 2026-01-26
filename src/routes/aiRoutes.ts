@@ -4,7 +4,7 @@ import {
   getRecommendations,
   updateRecommendationStatus
 } from '../controllers/aiController'
-import { optionalToken, validateToken } from '../controllers/authenticationController'
+import { validateToken } from '../controllers/authenticationController'
 
 export function getAIRoutes() {
   const router = Router()

@@ -3,10 +3,9 @@ import {
   getProfile, 
   updateProfile, 
   changePassword, 
-  deleteAccount,
-  getUserStats 
+  deleteAccount, 
 } from '../controllers/userController'
-import { optionalToken, validateToken } from '../controllers/authenticationController'
+import { validateToken } from '../controllers/authenticationController'
 
 export function getUserRoutes() {
   const router = Router()
@@ -45,7 +44,5 @@ export function getUserRoutes() {
    * GET /api/user/stats
    * Headers: Authorization: {token}
    */
-  router.get('/stats', getUserStats)
-
   return router
 }

@@ -3,15 +3,16 @@
 // ==========================
 import { Request, Response } from 'express'
 import { PrismaClient } from '@prisma/client'
+import { RequestWithTokenInterface } from '../interfaces/RequestWithTokenInterface'
 
 const prisma = new PrismaClient()
 
 /**
  * Obtiene las metas del usuario
  */
-export async function getGoals(req: Request, res: Response) {
+export async function getGoals(req: RequestWithTokenInterface, res: Response) {
   try {
-    const userId = (req as any).token.userId as string
+    const userId = req.token.userId as string
     const achieved = req.query.achieved as string | undefined
 
     const where: any = {}
@@ -40,7 +41,7 @@ export async function getGoals(req: Request, res: Response) {
 /**
  * Crea una nueva meta
  */
-export async function createGoal(req: Request, res: Response) {
+export async function createGoal(req: RequestWithTokenInterface, res: Response) {
   try {
     const {
       type,
@@ -81,7 +82,7 @@ export async function createGoal(req: Request, res: Response) {
 /**
  * Actualiza una meta existente
  */
-export async function updateGoal(req: Request, res: Response) {
+export async function updateGoal(req: RequestWithTokenInterface, res: Response) {
   try {
     const id = req.params.id as string
     const { current, target, deadline, achieved, priority } = req.body
@@ -109,10 +110,10 @@ export async function updateGoal(req: Request, res: Response) {
 /**
  * Elimina una meta
  */
-export async function deleteGoal(req: Request, res: Response) {
+export async function deleteGoal(req: RequestWithTokenInterface, res: Response) {
   try {
     const id = req.params.id as string
-
+    
     await prisma.goal.delete({
       where: { id }
     })
@@ -127,7 +128,7 @@ export async function deleteGoal(req: Request, res: Response) {
 /**
  * Obtiene el progreso de todas las metas activas
  */
-export async function getGoalsProgress(req: Request, res: Response) {
+export async function getGoalsProgress(req: RequestWithTokenInterface, res: Response) {
   try {
     const userId = (req as any).token.userId as string
 

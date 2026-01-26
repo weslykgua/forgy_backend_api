@@ -20,6 +20,7 @@ import { getMeasurementRoutes } from './routes/measurementsRoutes'
 import { getDashboardRoutes } from './routes/dashboardRoutes'
 import { getGoalRoutes } from './routes/goalRoutes'
 import { getAIRoutes } from './routes/aiRoutes'
+import { getStreakRoutes } from './routes/streakRoutes'
 
 // ================= CONFIG =================
 dotenv.config()
@@ -66,6 +67,7 @@ app.use('/api/exercises', getExercisesRoutes())
 // ========== RUTAS PROTEGIDAS ==========
 app.use('/api/user', getUserRoutes())
 app.use('/api/routines', getRoutinesRoutes())
+app.use('/api/streak', getStreakRoutes())
 app.use('/api/workouts', getWorkoutsRoutes())
 app.use('/api/progress', getProgressRoutes())
 app.use('/api/measurements', getMeasurementRoutes())
