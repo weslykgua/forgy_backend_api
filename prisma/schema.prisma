@@ -10,6 +10,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+
 // ==========================
 // User
 // ==========================
@@ -70,7 +71,7 @@ model Routine {
   id          String   @id @default(uuid())
   name        String
   description String?
-  type        String   // playlist | workout | template
+  type        String?   // playlist | workout | template
   isFavorite  Boolean  @default(false)
   isPublic    Boolean  @default(false)
   difficulty  String?  // beginner, intermediate, advanced
