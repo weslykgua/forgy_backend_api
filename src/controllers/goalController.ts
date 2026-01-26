@@ -7,6 +7,91 @@ import { RequestWithTokenInterface } from '../interfaces/RequestWithTokenInterfa
 
 const prisma = new PrismaClient()
 
+type PlanInput = {
+  age: number
+  weight: number
+  height: number
+  sex: 'male' | 'female' | 'other'
+  goal: 'lose_weight' | 'maintain' | 'gain_muscle'
+  daysPerWeek: number
+  minutesPerDay: number
+  equipment: string[]
+  injuries: string
+}
+
+function getActivityFactor(daysPerWeek: number) {
+  if (daysPerWeek <= 1) return 1.2
+  if (daysPerWeek === 2) return 1.375
+  if (daysPerWeek === 3) return 1.45
+  if (daysPerWeek === 4) return 1.55
+  if (daysPerWeek === 5) return 1.65
+  return 1.75
+}
+
+function calculateNutrition(plan: PlanInput) {
+  const { age, weight, height, sex, goal, daysPerWeek } = plan
+  const baseBmr =
+    sex === 'male'
+      ? 10 * weight + 6.25 * height - 5 * age + 5
+      : 10 * weight + 6.25 * height - 5 * age - 161
+  const tdee = baseBmr * getActivityFactor(daysPerWeek)
+  const goalAdjustment = goal === 'lose_weight' ? -400 : goal === 'gain_muscle' ? 300 : 0
+  const calories = Math.max(1200, Math.round(tdee + goalAdjustment))
+
+  const proteinPerKg = goal === 'gain_muscle' ? 2.0 : goal === 'lose_weight' ? 1.8 : 1.6
+  const protein = Math.round(proteinPerKg * weight)
+  const fat = Math.round(0.8 * weight)
+  const caloriesFromProtein = protein * 4
+  const caloriesFromFat = fat * 9
+  const carbs = Math.max(0, Math.round((calories - caloriesFromProtein - caloriesFromFat) / 4))
+
+  return { calories, protein, fat, carbs }
+}
+
+function generateRoutine(plan: PlanInput) {
+  const { daysPerWeek, minutesPerDay, equipment, injuries } = plan
+  const hasGym = equipment.includes('gimnasio')
+  const hasDumbbells = equipment.includes('mancuernas')
+  const hasBands = equipment.includes('bandas')
+  const hasBodyweight = equipment.includes('peso_corporal')
+
+  const base = {
+    warmup: '5-10 min movilidad + activación',
+    cooldown: '5 min estiramientos'
+  }
+
+  let split: string[] = []
+  if (daysPerWeek <= 2) {
+    split = ['Full body A', 'Full body B']
+  } else if (daysPerWeek === 3) {
+    split = ['Full body A', 'Full body B', 'Full body C']
+  } else if (daysPerWeek === 4) {
+    split = ['Upper A', 'Lower A', 'Upper B', 'Lower B']
+  } else if (daysPerWeek === 5) {
+    split = ['Push', 'Pull', 'Legs', 'Upper', 'Lower']
+  } else {
+    split = ['Push', 'Pull', 'Legs', 'Push', 'Pull', 'Legs']
+  }
+
+  const equipmentNote = hasGym
+    ? 'Enfoque gimnasio con barras y máquinas'
+    : hasDumbbells
+      ? 'Enfoque con mancuernas en casa'
+      : hasBands
+        ? 'Enfoque con bandas elásticas'
+        : hasBodyweight
+          ? 'Enfoque peso corporal'
+          : 'Enfoque mixto básico'
+
+  const injuryNote = injuries?.trim()
+    ? `Considera limitaciones por lesiones: ${injuries}`
+    : 'Sin lesiones declaradas'
+
+  const summary = `${split.join(' / ')} · ${minutesPerDay} min · ${equipmentNote}`
+
+  return { split, minutesPerDay, notes: [base.warmup, base.cooldown, injuryNote], summary }
+}
+
 /**
  * Obtiene las metas del usuario
  */
@@ -163,5 +248,73 @@ export async function getGoalsProgress(req: RequestWithTokenInterface, res: Resp
   } catch (error) {
     console.error(error)
     res.status(500).json({ error: 'Error al obtener progreso de metas' })
+  }
+}
+
+export async function getPlan(req: RequestWithTokenInterface, res: Response) {
+  try {
+    const userId = req.token.userId as string
+    const plan = await prisma.goal.findFirst({
+      where: { userId, type: 'routine_plan' }
+    })
+    res.json(plan || null)
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ error: 'Error al obtener plan' })
+  }
+}
+
+export async function upsertPlan(req: RequestWithTokenInterface, res: Response) {
+  try {
+    const userId = req.token.userId as string
+    const input = req.body as PlanInput
+
+    const nutrition = calculateNutrition(input)
+    const routine = generateRoutine(input)
+
+    const existing = await prisma.goal.findFirst({
+      where: { userId, type: 'routine_plan' }
+    })
+
+    const data = {
+      type: 'routine_plan',
+      target: 0,
+      current: 0,
+      unit: 'plan',
+      achieved: false,
+      priority: 'high',
+      planData: input,
+      nutritionData: nutrition,
+      routineSummary: routine.summary,
+      caloriesTarget: nutrition.calories,
+      proteinTarget: nutrition.protein,
+      carbsTarget: nutrition.carbs,
+      fatTarget: nutrition.fat,
+      userId
+    }
+
+    const plan = existing
+      ? await prisma.goal.update({ where: { id: existing.id }, data })
+      : await prisma.goal.create({ data })
+
+    res.json(plan)
+  } catch (error) {
+    console.error(error)
+    res.status(400).json({ error: 'Error al guardar plan' })
+  }
+}
+
+export async function deletePlan(req: RequestWithTokenInterface, res: Response) {
+  try {
+    const userId = req.token.userId as string
+    const existing = await prisma.goal.findFirst({
+      where: { userId, type: 'routine_plan' }
+    })
+    if (!existing) return res.json({ message: 'No hay plan' })
+    await prisma.goal.delete({ where: { id: existing.id } })
+    res.json({ message: 'Plan eliminado' })
+  } catch (error) {
+    console.error(error)
+    res.status(400).json({ error: 'Error al eliminar plan' })
   }
 }

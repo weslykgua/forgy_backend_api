@@ -20,10 +20,15 @@ export async function getMeasurements(req: Request, res: Response) {
 
 export async function createMeasurement(req: Request, res: Response) {
   try {
+    const userId = (req as any).token?.userId as string | undefined
+    if (!userId) {
+      return res.status(401).json({ error: 'Usuario no autorizado' })
+    }
+
     const measurement = await prisma.bodyMeasurement.create({
       data: {
         date: new Date(req.body.date),
-        userId: req.body.userId,
+        userId,
         weight: req.body.weight,
         bodyFat: req.body.bodyFat,
         chest: req.body.chest,
