@@ -1,4 +1,4 @@
-import { Exercise } from '../interfaces/Exercise'
+import { Exercise } from '../interfaces/ExerciseInterface'
 
 export const exercisesDB: Exercise[] = [
   // PECHO
@@ -520,4 +520,240 @@ export const exercisesDB: Exercise[] = [
     ],
     createdAt: new Date().toISOString(),
   },
+   {
+    id: '33',
+    name: 'Press Declinado',
+    muscle: 'Pecho',
+    video: '',
+    description: 'Enfoque en el pecho inferior',
+    difficulty: 'Intermedio',
+    equipment: 'Barra y banco declinado',
+    instructions: [
+      'Ajusta el banco en declive',
+      'Agarra la barra firmemente',
+      'Baja al pecho',
+      'Empuja hacia arriba',
+    ],
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: '34',
+    name: 'Cruce de Poleas',
+    muscle: 'Pecho',
+    video: '',
+    description: 'Aislamiento continuo del pecho',
+    difficulty: 'Principiante',
+    equipment: 'Poleas',
+    instructions: [
+      'Agarra las poleas',
+      'Da un paso al frente',
+      'Cruza las manos al frente',
+      'Aprieta el pecho',
+    ],
+    createdAt: new Date().toISOString(),
+  },
+
+  // ESPALDA (extras)
+  {
+    id: '35',
+    name: 'Remo en Polea Baja',
+    muscle: 'Espalda',
+    video: '',
+    description: 'Trabajo de densidad en la espalda',
+    difficulty: 'Principiante',
+    equipment: 'Polea baja',
+    instructions: [
+      'Siéntate con espalda recta',
+      'Tira el agarre al abdomen',
+      'Aprieta escápulas',
+      'Regresa controlado',
+    ],
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: '36',
+    name: 'Pullover',
+    muscle: 'Espalda',
+    video: '',
+    description: 'Trabajo de dorsales y serrato',
+    difficulty: 'Intermedio',
+    equipment: 'Mancuerna o polea',
+    instructions: [
+      'Acostado en banco',
+      'Baja el peso detrás de la cabeza',
+      'Lleva nuevamente al frente',
+      'Mantén brazos semi extendidos',
+    ],
+    createdAt: new Date().toISOString(),
+  },
+
+  // PIERNAS (extras)
+  {
+    id: '37',
+    name: 'Sentadilla Frontal',
+    muscle: 'Piernas',
+    video: '',
+    description: 'Mayor énfasis en cuádriceps',
+    difficulty: 'Avanzado',
+    equipment: 'Barra',
+    instructions: [
+      'Barra al frente de los hombros',
+      'Codos altos',
+      'Baja manteniendo el torso erguido',
+      'Sube controlado',
+    ],
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: '38',
+    name: 'Hip Thrust',
+    muscle: 'Piernas',
+    video: '',
+    description: 'Ejercicio clave para glúteos',
+    difficulty: 'Intermedio',
+    equipment: 'Barra y banco',
+    instructions: [
+      'Espalda alta apoyada en banco',
+      'Barra sobre la cadera',
+      'Empuja hacia arriba',
+      'Aprieta glúteos arriba',
+    ],
+    createdAt: new Date().toISOString(),
+  },
+
+  // HOMBROS (extras)
+  {
+    id: '39',
+    name: 'Press Arnold',
+    muscle: 'Hombros',
+    video: '',
+    description: 'Variación completa del press',
+    difficulty: 'Intermedio',
+    equipment: 'Mancuernas',
+    instructions: [
+      'Mancuernas al frente',
+      'Rota mientras empujas',
+      'Extiende completamente',
+      'Regresa controlado',
+    ],
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: '40',
+    name: 'Remo al Mentón',
+    muscle: 'Hombros',
+    video: '',
+    description: 'Trabajo de deltoide lateral y trapecio',
+    difficulty: 'Intermedio',
+    equipment: 'Barra',
+    instructions: [
+      'Agarra la barra cerrada',
+      'Tira hacia el mentón',
+      'Codos hacia arriba',
+      'Baja lentamente',
+    ],
+    createdAt: new Date().toISOString(),
+  },
+
+  // BÍCEPS (extras)
+  {
+    id: '41',
+    name: 'Curl en Banco Inclinado',
+    muscle: 'Bíceps',
+    video: '',
+    description: 'Mayor estiramiento del bíceps',
+    difficulty: 'Intermedio',
+    equipment: 'Mancuernas y banco',
+    instructions: [
+      'Apoya la espalda en banco inclinado',
+      'Brazos extendidos',
+      'Flexiona los codos',
+      'Baja lentamente',
+    ],
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: '42',
+    name: 'Curl en Polea',
+    muscle: 'Bíceps',
+    video: '',
+    description: 'Tensión constante durante todo el recorrido',
+    difficulty: 'Principiante',
+    equipment: 'Polea baja',
+    instructions: [
+      'Agarra la barra',
+      'Flexiona los codos',
+      'Aprieta arriba',
+      'Regresa controlado',
+    ],
+    createdAt: new Date().toISOString(),
+  },
+
+  // TRÍCEPS (extras)
+  {
+    id: '43',
+    name: 'Extensión por Encima de la Cabeza',
+    muscle: 'Tríceps',
+    video: '',
+    description: 'Énfasis en la cabeza larga',
+    difficulty: 'Principiante',
+    equipment: 'Mancuerna o polea',
+    instructions: [
+      'Peso sobre la cabeza',
+      'Codos fijos',
+      'Extiende los brazos',
+      'Baja lentamente',
+    ],
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: '44',
+    name: 'Fondos en Paralelas (Tríceps)',
+    muscle: 'Tríceps',
+    video: '',
+    description: 'Variación enfocada en tríceps',
+    difficulty: 'Avanzado',
+    equipment: 'Paralelas',
+    instructions: [
+      'Torso erguido',
+      'Codos pegados',
+      'Baja controlado',
+      'Extiende completamente',
+    ],
+    createdAt: new Date().toISOString(),
+  },
+
+  // ABDOMEN (extras)
+  {
+    id: '45',
+    name: 'Ab Wheel',
+    muscle: 'Abdomen',
+    video: '',
+    description: 'Trabajo avanzado del core',
+    difficulty: 'Avanzado',
+    equipment: 'Rueda abdominal',
+    instructions: [
+      'Arrodíllate en el suelo',
+      'Rueda hacia adelante',
+      'Mantén el core firme',
+      'Regresa controlado',
+    ],
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: '46',
+    name: 'Mountain Climbers',
+    muscle: 'Abdomen',
+    video: '',
+    description: 'Ejercicio dinámico de core y cardio',
+    difficulty: 'Principiante',
+    equipment: 'Ninguno',
+    instructions: [
+      'Posición de plancha',
+      'Lleva rodillas al pecho',
+      'Alterna rápidamente',
+      'Mantén el abdomen activo',
+    ],
+    createdAt: new Date().toISOString(),
+  }
 ]

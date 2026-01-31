@@ -1,186 +1,36 @@
 import { Request, Response } from 'express'
 import { PrismaClient } from '@prisma/client'
 import bcrypt from 'bcryptjs'
-import jwt from 'jsonwebtoken'
 
 const prisma = new PrismaClient()
 
-const JWT_SECRET = process.env.JWT_SECRET || 'forgy-secret-key-change-in-production'
-
-interface JWTPayload {
-  userId: string
-  email: string
-  from: string
-  until: string
-}
-
 /**
- * Registra un nuevo usuario
+ * Obtiene el perfil del usuario autenticado
  */
-export async function register(req: Request, res: Response) {
-  try {
-    const { 
-      email, 
-      password, 
-      name, 
-      age, 
-      weight, 
-      height, 
-      gender, 
-      activityLevel, 
-      fitnessGoal 
-    } = req.body
-
-    if (!email || !password) {
-      return res.status(400).json({ 
-        error: 'Email y contraseña son obligatorios' 
-      })
-    }
-
-    if (password.length < 6) {
-      return res.status(400).json({ 
-        error: 'La contraseña debe tener al menos 6 caracteres' 
-      })
-    }
-
-    const existingUser = await prisma.user.findUnique({
-      where: { email: email.toLowerCase() }
-    })
-
-    if (existingUser) {
-      return res.status(409).json({ 
-        error: 'El email ya está registrado' 
-      })
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10)
-
-    const user = await prisma.user.create({
-      data: {
-        email: email.toLowerCase(),
-        password: hashedPassword,
-        name,
-        age,
-        weight,
-        height,
-        gender,
-        activityLevel,
-        fitnessGoal
-      }
-    })
-
-    await prisma.workoutStreak.create({
-      data: {
-        userId: user.id,
-        currentStreak: 0,
-        longestStreak: 0
-      }
-    })
-
-    const now = new Date()
-    const expiresAt = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000) // 7 días
-
-    const tokenPayload: JWTPayload = { 
-      userId: user.id, 
-      email: user.email,
-      from: now.toISOString(),
-      until: expiresAt.toISOString()
-    }
-
-    // ✅ Solución: usar '7d' directamente como literal o quitar las options
-    const token = jwt.sign(tokenPayload, JWT_SECRET, { expiresIn: '7d' })
-
-    const { password: _, ...userWithoutPassword } = user
-
-    res.status(201).json({
-      message: 'Usuario registrado exitosamente',
-      user: userWithoutPassword,
-      token,
-      tokenData: {
-        userId: user.id,
-        from: now.toISOString(),
-        until: expiresAt.toISOString()
-      }
-    })
-  } catch (error) {
-    console.error('Error en registro:', error)
-    res.status(500).json({ error: 'Error al registrar usuario' })
-  }
-}
-
-/**
- * Inicia sesión
- */
-export async function login(req: Request, res: Response) {
-  try {
-    const { email, password } = req.body
-
-    if (!email || !password) {
-      return res.status(400).json({ 
-        error: 'Email y contraseña son obligatorios' 
-      })
-    }
-
-    const user = await prisma.user.findUnique({
-      where: { email: email.toLowerCase() }
-    })
-
-    if (!user) {
-      return res.status(401).json({ 
-        error: 'Credenciales inválidas' 
-      })
-    }
-
-    const isPasswordValid = await bcrypt.compare(password, user.password)
-
-    if (!isPasswordValid) {
-      return res.status(401).json({ 
-        error: 'Credenciales inválidas' 
-      })
-    }
-
-    const now = new Date()
-    const expiresAt = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
-
-    const tokenPayload: JWTPayload = { 
-      userId: user.id, 
-      email: user.email,
-      from: now.toISOString(),
-      until: expiresAt.toISOString()
-    }
-
-    const token = jwt.sign(tokenPayload, JWT_SECRET, { expiresIn: '7d' })
-
-    const { password: _, ...userWithoutPassword } = user
-
-    res.json({
-      message: 'Inicio de sesión exitoso',
-      user: userWithoutPassword,
-      token,
-      tokenData: {
-        userId: user.id,
-        from: now.toISOString(),
-        until: expiresAt.toISOString()
-      }
-    })
-  } catch (error) {
-    console.error('Error en login:', error)
-    res.status(500).json({ error: 'Error al iniciar sesión' })
-  }
-}
-
 export async function getProfile(req: Request, res: Response) {
   try {
-    const userId = req.body.token.userId as string
+    const userId = (req as any).token.userId as string
 
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      include: {
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        age: true,
+        weight: true,
+        height: true,
+        gender: true,
+        activityLevel: true,
+        fitnessGoal: true,
+        createdAt: true,
+        updatedAt: true,
         _count: {
           select: {
             routines: true,
             sessions: true,
-            goals: true
+            goals: true,
+            records: true,
           }
         }
       }
@@ -190,56 +40,89 @@ export async function getProfile(req: Request, res: Response) {
       return res.status(404).json({ error: 'Usuario no encontrado' })
     }
 
-    const { password: _, ...userWithoutPassword } = user
-
-    res.json(userWithoutPassword)
+    return res.json(user)
   } catch (error) {
     console.error('Error al obtener perfil:', error)
-    res.status(500).json({ error: 'Error al obtener perfil' })
+    return res.status(500).json({ error: 'Error al obtener perfil' })
   }
 }
 
+/**
+ * Actualiza el perfil del usuario autenticado
+ */
 export async function updateProfile(req: Request, res: Response) {
   try {
-    const userId = req.body.token.userId as string
-    const { name, age, weight, height, gender, activityLevel, fitnessGoal } = req.body
+    const userId = (req as any).token.userId as string
+    const {
+      name,
+      age,
+      weight,
+      height,
+      gender,
+      activityLevel,
+      fitnessGoal
+    } = req.body
+
+    const data: any = {}
+    if (name !== undefined) data.name = name
+    if (age !== undefined) data.age = age
+    if (weight !== undefined) data.weight = weight
+    if (height !== undefined) data.height = height
+    if (gender !== undefined) data.gender = gender
+    if (activityLevel !== undefined) data.activityLevel = activityLevel
+    if (fitnessGoal !== undefined) data.fitnessGoal = fitnessGoal
 
     const updatedUser = await prisma.user.update({
       where: { id: userId },
-      data: { name, age, weight, height, gender, activityLevel, fitnessGoal }
+      data,
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        age: true,
+        weight: true,
+        height: true,
+        gender: true,
+        activityLevel: true,
+        fitnessGoal: true,
+        updatedAt: true,
+      }
     })
 
-    const { password: _, ...userWithoutPassword } = updatedUser
-
-    res.json({
+    return res.json({
       message: 'Perfil actualizado exitosamente',
-      user: userWithoutPassword
+      user: updatedUser
     })
   } catch (error) {
     console.error('Error al actualizar perfil:', error)
-    res.status(500).json({ error: 'Error al actualizar perfil' })
+    return res.status(500).json({ error: 'Error al actualizar perfil' })
   }
 }
 
+/**
+ * Cambia la contraseña del usuario
+ */
 export async function changePassword(req: Request, res: Response) {
   try {
-    const userId = req.body.token.userId as string
-    const { currentPassword, newPassword } = req.body
+    const userId = (req as any).token.userId as string
+    const currentPassword = typeof req.body.currentPassword === 'string' ? req.body.currentPassword : ''
+    const newPassword = typeof req.body.newPassword === 'string' ? req.body.newPassword : ''
 
     if (!currentPassword || !newPassword) {
-      return res.status(400).json({ 
-        error: 'Contraseña actual y nueva son obligatorias' 
+      return res.status(400).json({
+        error: 'Contraseña actual y nueva son obligatorias'
       })
     }
 
     if (newPassword.length < 6) {
-      return res.status(400).json({ 
-        error: 'La nueva contraseña debe tener al menos 6 caracteres' 
+      return res.status(400).json({
+        error: 'La nueva contraseña debe tener al menos 6 caracteres'
       })
     }
 
     const user = await prisma.user.findUnique({
-      where: { id: userId }
+      where: { id: userId },
+      select: { id: true, password: true }
     })
 
     if (!user) {
@@ -249,38 +132,44 @@ export async function changePassword(req: Request, res: Response) {
     const isPasswordValid = await bcrypt.compare(currentPassword, user.password)
 
     if (!isPasswordValid) {
-      return res.status(401).json({ 
-        error: 'La contraseña actual es incorrecta' 
+      return res.status(401).json({
+        error: 'La contraseña actual es incorrecta'
       })
     }
 
-    const hashedPassword = await bcrypt.hash(newPassword, 10)
+    const saltRounds = Number(process.env.BCRYPT_SALT_ROUNDS ?? 10)
+    const safeSaltRounds = Number.isFinite(saltRounds) && saltRounds > 0 ? saltRounds : 10
+    const hashedPassword = await bcrypt.hash(newPassword, safeSaltRounds)
 
     await prisma.user.update({
       where: { id: userId },
       data: { password: hashedPassword }
     })
 
-    res.json({ message: 'Contraseña cambiada exitosamente' })
+    return res.json({ message: 'Contraseña cambiada exitosamente' })
   } catch (error) {
     console.error('Error al cambiar contraseña:', error)
-    res.status(500).json({ error: 'Error al cambiar contraseña' })
+    return res.status(500).json({ error: 'Error al cambiar contraseña' })
   }
 }
 
+/**
+ * Elimina la cuenta del usuario
+ */
 export async function deleteAccount(req: Request, res: Response) {
   try {
-    const userId = req.body.token.userId as string
-    const { password } = req.body
+    const userId = (req as any).token.userId as string
+    const password = typeof req.body.password === 'string' ? req.body.password : ''
 
     if (!password) {
-      return res.status(400).json({ 
-        error: 'Se requiere la contraseña para eliminar la cuenta' 
+      return res.status(400).json({
+        error: 'Se requiere la contraseña para eliminar la cuenta'
       })
     }
 
     const user = await prisma.user.findUnique({
-      where: { id: userId }
+      where: { id: userId },
+      select: { id: true, password: true }
     })
 
     if (!user) {
@@ -290,18 +179,19 @@ export async function deleteAccount(req: Request, res: Response) {
     const isPasswordValid = await bcrypt.compare(password, user.password)
 
     if (!isPasswordValid) {
-      return res.status(401).json({ 
-        error: 'Contraseña incorrecta' 
+      return res.status(401).json({
+        error: 'Contraseña incorrecta'
       })
     }
 
+    // Eliminar usuario (cascade elimina todos sus datos)
     await prisma.user.delete({
       where: { id: userId }
     })
 
-    res.json({ message: 'Cuenta eliminada exitosamente' })
+    return res.json({ message: 'Cuenta eliminada exitosamente' })
   } catch (error) {
     console.error('Error al eliminar cuenta:', error)
-    res.status(500).json({ error: 'Error al eliminar cuenta' })
+    return res.status(500).json({ error: 'Error al eliminar cuenta' })
   }
 }

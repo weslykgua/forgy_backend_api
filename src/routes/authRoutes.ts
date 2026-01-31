@@ -1,17 +1,17 @@
 import { Router } from 'express'
-import { login, register } from '../controllers/authController'
+import { register, login } from '../controllers/authController'
 
-export function getAuthRoutes(): Router {
+export function getAuthRoutes() {
   const router = Router()
 
   /**
-   * POST /auth/register
+   * POST /api/auth/register
    * Body: { email, password, name }
    */
   router.post('/register', register)
 
   /**
-   * POST /auth/login
+   * POST /api/auth/login
    * Body: { email, password }
    */
   router.post('/login', login)

@@ -18,7 +18,7 @@ interface UserData {
  */
 export async function generateRecommendations(req: Request, res: Response) {
   try {
-    const userId = req.params.userId as string
+    const userId = (req as any).token.userId as string
 
     // Obtener todos los datos relevantes del usuario
     const userData = await gatherUserData(userId)
@@ -59,7 +59,7 @@ export async function generateRecommendations(req: Request, res: Response) {
  */
 export async function getRecommendations(req: Request, res: Response) {
   try {
-    const userId = req.params.userId as string
+    const userId = (req as any).token.userId as string
     const status = (req.query.status as string) || 'pending'
 
     const recommendations = await prisma.aIRecommendation.findMany({
@@ -72,7 +72,7 @@ export async function getRecommendations(req: Request, res: Response) {
         ]
       },
       orderBy: [
-        { priority: 'asc' }, // high primero
+        { priority: 'asc' },
         { createdAt: 'desc' }
       ]
     })
@@ -167,7 +167,7 @@ async function generateWorkoutRecommendations(data: UserData) {
       priority: 'high',
       basedOn: { workoutCount: data.recentWorkouts.length, period: '30 days' },
       confidence: 0.9,
-      expiresAt: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000) // 7 días
+      expiresAt: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
     })
   }
 
@@ -180,20 +180,23 @@ async function generateWorkoutRecommendations(data: UserData) {
     }, {})
 
   const totalExercises = Object.values(muscleGroups).reduce((a: any, b: any) => a + b, 0) as number
-  const undertrainedMuscles = Object.entries(muscleGroups)
-    .filter(([_, count]) => (count as number) / totalExercises < 0.1)
-    .map(([muscle]) => muscle)
 
-  if (undertrainedMuscles.length > 0) {
-    recommendations.push({
-      type: 'workout',
-      title: 'Equilibra tu entrenamiento',
-      description: `Has estado entrenando poco estos grupos musculares: ${undertrainedMuscles.join(', ')}. Considera agregar ejercicios para estos músculos.`,
-      priority: 'medium',
-      basedOn: { muscleDistribution: muscleGroups },
-      confidence: 0.85,
-      expiresAt: new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000)
-    })
+  if (totalExercises > 0) {
+    const undertrainedMuscles = Object.entries(muscleGroups)
+      .filter(([_, count]) => (count as number) / totalExercises < 0.1)
+      .map(([muscle]) => muscle)
+
+    if (undertrainedMuscles.length > 0) {
+      recommendations.push({
+        type: 'workout',
+        title: 'Equilibra tu entrenamiento',
+        description: `Has estado entrenando poco estos grupos musculares: ${undertrainedMuscles.join(', ')}. Considera agregar ejercicios para estos músculos.`,
+        priority: 'medium',
+        basedOn: { muscleDistribution: muscleGroups },
+        confidence: 0.85,
+        expiresAt: new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000)
+      })
+    }
   }
 
   // 3. Recomendar progresión
@@ -255,20 +258,22 @@ async function generateRecoveryRecommendations(data: UserData) {
   })
 
   if (lastWeekWorkouts.length >= 6) {
-    const avgRating = lastWeekWorkouts
-      .filter(w => w.rating)
-      .reduce((sum, w) => sum + w.rating, 0) / lastWeekWorkouts.length
+    const ratingsWithValue = lastWeekWorkouts.filter(w => w.rating)
 
-    if (avgRating < 3) {
-      recommendations.push({
-        type: 'recovery',
-        title: 'Considera un día de descanso',
-        description: 'Has entrenado mucho esta semana y tus valoraciones han sido bajas. Tu cuerpo podría necesitar recuperación.',
-        priority: 'high',
-        basedOn: { weeklyWorkouts: lastWeekWorkouts.length, avgRating },
-        confidence: 0.85,
-        expiresAt: new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000)
-      })
+    if (ratingsWithValue.length > 0) {
+      const avgRating = ratingsWithValue.reduce((sum, w) => sum + w.rating, 0) / ratingsWithValue.length
+
+      if (avgRating < 3) {
+        recommendations.push({
+          type: 'recovery',
+          title: 'Considera un día de descanso',
+          description: 'Has entrenado mucho esta semana y tus valoraciones han sido bajas. Tu cuerpo podría necesitar recuperación.',
+          priority: 'high',
+          basedOn: { weeklyWorkouts: lastWeekWorkouts.length, avgRating },
+          confidence: 0.85,
+          expiresAt: new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000)
+        })
+      }
     }
   }
 
@@ -302,7 +307,7 @@ async function generateGoalRecommendations(data: UserData) {
 
   for (const goal of data.goals) {
     const progress = ((goal.current / goal.target) * 100).toFixed(1)
-    const daysLeft = goal.deadline 
+    const daysLeft = goal.deadline
       ? Math.ceil((new Date(goal.deadline).getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
       : null
 

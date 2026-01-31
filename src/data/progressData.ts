@@ -1,4 +1,4 @@
-import { DailyProgress } from '../interfaces/DailyProgress'
+import { DailyProgress } from '../interfaces/DailyProgressInterface'
 
 export const dailyProgressDB: DailyProgress[] = [
   {
