@@ -23,6 +23,9 @@ dotenv.config()
 const app: Application = express()
 const httpServer = createServer(app)
 
+// Confiar en el proxy de Railway para que el rate-limit y CORS funcionen bien
+app.set('trust proxy', 1)
+
 // Orígenes permitidos (URLs de tu frontend en producción y desarrollo)
 const allowedOrigins = [
   process.env.FRONTEND_URL || 'http://localhost:5173',
