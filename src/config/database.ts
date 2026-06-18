@@ -1,15 +1,9 @@
 import { PrismaClient } from '@prisma/client'
-import { Pool } from 'pg'
-import { PrismaPg } from '@prisma/adapter-pg'
 
 // Declaración global para evitar múltiples instancias en desarrollo
 declare global {
   var prisma: PrismaClient | undefined
 }
-
-const connectionString = `${process.env.DATABASE_URL}`
-const pool = new Pool({ connectionString })
-const adapter = new PrismaPg(pool)
 
 /**
  * Singleton de PrismaClient
@@ -19,7 +13,6 @@ const adapter = new PrismaPg(pool)
 const prisma =
   global.prisma ||
   new PrismaClient({
-    adapter,
     log: process.env.NODE_ENV === 'development' ? ['query', 'info', 'warn', 'error'] : ['error'],
   })
 
