@@ -4,3 +4,7 @@ node_modules/
 package-lock.json
 postgres-data/
 dist/
+
+# Archivos de Docker locales
+docker-compose.yml
+studio.dockerfile
