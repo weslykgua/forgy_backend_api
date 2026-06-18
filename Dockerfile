@@ -10,7 +10,6 @@ RUN apt-get update && apt-get install -y openssl
 COPY package*.json ./
 COPY tsconfig.json ./
 COPY prisma ./prisma/
-COPY prisma.config.ts ./
 COPY src ./src/
 
 # Instalar dependencias
@@ -31,7 +30,6 @@ RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 
 COPY package*.json ./
 COPY prisma ./prisma/
-COPY prisma.config.ts ./
 
 # Solo dependencias de producción
 RUN DATABASE_URL="postgresql://dummy:dummy@localhost/dummy" npm install --omit=dev
