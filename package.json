@@ -4,7 +4,7 @@
   "main": "dist/index.js",
   "scripts": {
     "dev": "nodemon src/index.ts",
-    "build": "tsc",
+    "build": "prisma generate && tsc",
     "start": "npx prisma migrate deploy && node dist/index.js",
     "lint": "eslint . --ext .ts --fix",
     "prisma:generate": "prisma generate",
@@ -33,7 +33,7 @@
     "@types/express": "5.0.0",
     "@types/jsonwebtoken": "9.0.10",
     "@types/morgan": "1.9.9",
-    "@types/node": "22.10.1",
+    "@types/node": "^22.10.1",
     "@typescript-eslint/eslint-plugin": "8.18.0",
     "@typescript-eslint/parser": "8.18.0",
     "eslint": "9.16.0",

@@ -1,20 +1,32 @@
-# Etapa 1: Construcción (Builder)
+# =========================
+# Etapa 1: Build
+# =========================
 FROM node:18-bullseye-slim AS builder
+
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y openssl
 
 COPY package*.json ./
-COPY prisma ./prisma/
 COPY tsconfig.json ./
+COPY prisma ./prisma/
 COPY src ./src/
 
+# Instalar dependencias
 RUN npm install
+
+# Generar Prisma Client
 RUN DATABASE_URL="postgresql://dummy:dummy@localhost/dummy" npx prisma generate
+
+# Compilar TypeScript
 RUN npm run build
 
+
+# =========================
 # Etapa 2: Producción
+# =========================
 FROM node:18-bullseye-slim
+
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
@@ -22,11 +34,18 @@ RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 COPY package*.json ./
 COPY prisma ./prisma/
 
+# Solo dependencias de producción
 RUN npm install --omit=dev
-RUN DATABASE_URL="postgresql://dummy:dummy@localhost/dummy" npx prisma generate
 
+# Copiar Prisma Client generado
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
+
+# Copiar build compilado
 COPY --from=builder /app/dist ./dist
 
 EXPOSE 3000
+
 ENV NODE_ENV=production
-ENTRYPOINT ["npm", "start"]
+
+CMD ["npm", "start"]

@@ -98,7 +98,17 @@ app.use(
 )
 
 // ================= START SERVER =================
-httpServer.listen(PORT, async () => {
-  console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`)
-  await connectDB()
-})
+const startServer = async () => {
+  try {
+    await connectDB()
+
+    httpServer.listen(PORT, () => {
+      console.log(`🚀 Servidor corriendo en puerto ${PORT}`)
+    })
+  } catch (error) {
+    console.error('Error al conectar con la base de datos:', error)
+    process.exit(1)
+  }
+}
+
+startServer()
