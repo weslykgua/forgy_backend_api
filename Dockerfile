@@ -1,7 +1,7 @@
 # =========================
 # Etapa 1: Build
 # =========================
-FROM node:18-bullseye-slim AS builder
+FROM node:22-bookworm-slim AS builder
 
 WORKDIR /app
 
@@ -25,7 +25,7 @@ RUN npm run build
 # =========================
 # Etapa 2: Producción
 # =========================
-FROM node:18-bullseye-slim
+FROM node:22-bookworm-slim
 
 WORKDIR /app
 
