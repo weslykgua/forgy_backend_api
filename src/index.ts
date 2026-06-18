@@ -118,7 +118,7 @@ const startServer = async () => {
   try {
     await connectDB()
 
-    httpServer.listen(PORT, () => {
+    httpServer.listen(Number(PORT), '0.0.0.0', () => {
       console.log(`🚀 Servidor corriendo en puerto ${PORT}`)
     })
   } catch (error) {
