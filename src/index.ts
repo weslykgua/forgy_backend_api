@@ -5,6 +5,7 @@ import { createServer } from 'http'
 import { Server } from 'socket.io'
 import helmet from 'helmet'
 import compression from 'compression'
+import rateLimit from 'express-rate-limit'
 
 // Configuración de Prisma
 import { connectDB } from './config/database'
@@ -22,19 +23,34 @@ dotenv.config()
 const app: Application = express()
 const httpServer = createServer(app)
 
+// Orígenes permitidos (URLs de tu frontend en producción y desarrollo)
+const allowedOrigins = [
+  process.env.FRONTEND_URL || 'http://localhost:5173',
+  'http://localhost:8100' // Puerto de Ionic
+]
+
 const io = new Server(httpServer, {
   cors: {
-    origin: '*',
+    origin: allowedOrigins,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+    credentials: true
   },
 })
 
 const PORT = process.env.PORT || 3000
 
 // ================= MIDDLEWARES =================
+// Limitar peticiones para evitar fuerza bruta y DDoS
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  max: 150, // Máximo 150 peticiones por IP cada 15 minutos
+  message: { success: false, message: 'Demasiadas peticiones desde esta IP, intenta de nuevo más tarde.' },
+})
+
 app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }))
 app.use(compression())
-app.use(cors())
+app.use(cors({ origin: allowedOrigins, credentials: true }))
+app.use(limiter)
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
