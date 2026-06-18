@@ -27,8 +27,12 @@ const httpServer = createServer(app)
 app.set('trust proxy', 1)
 
 // Orígenes permitidos (URLs de tu frontend en producción y desarrollo)
+// Se limpia la barra final (/) en caso de que la variable de entorno la traiga por error
+const frontendUrl = (process.env.FRONTEND_URL || 'http://localhost:5173').replace(/\/$/, '')
+
 const allowedOrigins = [
-  process.env.FRONTEND_URL || 'http://localhost:5173',
+  frontendUrl,
+  'https://forgy-mobile-app.vercel.app', // Agregado directamente para máxima seguridad
   'http://localhost:8100' // Puerto de Ionic
 ]
 
