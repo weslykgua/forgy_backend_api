@@ -1,45 +1,49 @@
-import { Router } from 'express'
-import {
-  register,
-  login,
-  getProfile,
-  updateProfile,
-  changePassword,
-  deleteAccount
-} from '../controllers/userController'
+import { Router, Request, Response } from 'express'
 import { validateToken } from '../controllers/authenticationController'
+import prisma from '../config/database'
 
-const router = Router()
+export function getUserRoutes() {
+  const router = Router()
 
-/**
- * POST /api/auth/register
- */
-router.post('/register', register)
+  // Obtener datos del perfil
+  router.get('/profile', validateToken, async (req: Request, res: Response) => {
+    try {
+      const userId = req.body.token.userId
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { name: true, email: true, height: true, weight: true }
+      })
+      res.json(user)
+    } catch (error) {
+      res.status(500).json({ error: 'Error al obtener el perfil' })
+    }
+  })
 
-/**
- * POST /api/auth/login
- */
-router.post('/login', login)
+  // Actualizar datos del perfil (Peso, Altura)
+  router.put('/profile', validateToken, async (req: Request, res: Response) => {
+    try {
+      const userId = req.body.token.userId
+      const { height, weight } = req.body
+      const user = await prisma.user.update({
+        where: { id: userId },
+        data: { height, weight }
+      })
+      res.json(user)
+    } catch (error) {
+      res.status(500).json({ error: 'Error al actualizar el perfil' })
+    }
+  })
 
-/**
- * GET /api/auth/profile
- * Headers: Authorization: {token} o Authorization: Bearer {token}
- */
-router.get('/profile', validateToken, getProfile)
+  // Obtener racha de entrenamientos
+  router.get('/streak', validateToken, async (req: Request, res: Response) => {
+    try {
+      const userId = req.body.token.userId
+      const streak = await prisma.workoutStreak.findUnique({ where: { userId } })
+      res.json({ currentStreak: streak?.currentStreak || 0 })
+    } catch (error) {
+      res.status(500).json({ error: 'Error al obtener la racha' })
+    }
+  })
 
-/**
- * PUT /api/auth/profile
- */
-router.put('/profile', validateToken, updateProfile)
-
-/**
- * PUT /api/auth/change-password
- */
-router.put('/change-password', validateToken, changePassword)
-
-/**
- * DELETE /api/auth/account
- */
-router.delete('/account', validateToken, deleteAccount)
-
-export default router
+  return router
+}

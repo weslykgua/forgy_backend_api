@@ -1,0 +1,11 @@
+node_modules/
+dist/
+npm-debug.log
+
+# Entorno local y Docker Compose
+docker-compose.yml
+studio.dockerfile
+postgres-data/
+
+# Variables de entorno
+.env
