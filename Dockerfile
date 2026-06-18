@@ -10,13 +10,11 @@ RUN apt-get update && apt-get install -y openssl
 COPY package*.json ./
 COPY tsconfig.json ./
 COPY prisma ./prisma/
+COPY prisma.config.ts ./
 COPY src ./src/
 
 # Instalar dependencias
-RUN npm install
-
-# Generar Prisma Client
-RUN DATABASE_URL="postgresql://dummy:dummy@localhost/dummy" npx prisma generate
+RUN DATABASE_URL="postgresql://dummy:dummy@localhost/dummy" npm install
 
 # Compilar TypeScript
 RUN npm run build
@@ -33,9 +31,10 @@ RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 
 COPY package*.json ./
 COPY prisma ./prisma/
+COPY prisma.config.ts ./
 
 # Solo dependencias de producción
-RUN npm install --omit=dev
+RUN DATABASE_URL="postgresql://dummy:dummy@localhost/dummy" npm install --omit=dev
 
 # Copiar Prisma Client generado
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
