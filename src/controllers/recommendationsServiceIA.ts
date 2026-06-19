@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
 import { PrismaClient } from '@prisma/client'
 
-const prisma = new PrismaClient()
+import prisma from '../config/database'
 
 interface UserData {
   user: any
@@ -302,7 +302,7 @@ async function generateGoalRecommendations(data: UserData) {
 
   for (const goal of data.goals) {
     const progress = ((goal.current / goal.target) * 100).toFixed(1)
-    const daysLeft = goal.deadline 
+    const daysLeft = goal.deadline
       ? Math.ceil((new Date(goal.deadline).getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
       : null
 

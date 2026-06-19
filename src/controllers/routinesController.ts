@@ -1,11 +1,11 @@
 import { Request, Response } from 'express'
 import { PrismaClient } from '@prisma/client'
 
-const prisma = new PrismaClient()
+import prisma from '../config/database'
 
 export async function getRoutines(req: Request, res: Response) {
   try {
-    const userId = req.query.userId as string | undefined
+    const userId = req.body?.token?.userId as string
 
     const routines = await prisma.routine.findMany({
       where: userId ? { userId } : undefined,
@@ -35,7 +35,7 @@ export async function createRoutine(req: Request, res: Response) {
       return res.status(400).json({ error: 'Nombre es obligatorios' })
     }
     console.log("Rutina entro");
-    
+
     const routine = await prisma.routine.create({
       data: {
         name: name,
@@ -51,7 +51,7 @@ export async function createRoutine(req: Request, res: Response) {
     console.error(error)
     res.status(500).json({ error: 'Error al crear rutina', details: error.message })
     console.log("Rutina, error", error);
-    
+
   }
 }
 

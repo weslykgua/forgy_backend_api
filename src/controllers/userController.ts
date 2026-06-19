@@ -3,9 +3,10 @@ import { PrismaClient } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 
-const prisma = new PrismaClient()
+import prisma from '../config/database'
 
-const JWT_SECRET = process.env.JWT_SECRET || 'forgy-secret-key-change-in-production'
+const JWT_SECRET = process.env.JWT_SECRET
+if (!JWT_SECRET) throw new Error('JWT_SECRET environment variable is required')
 
 interface JWTPayload {
   userId: string
@@ -19,27 +20,27 @@ interface JWTPayload {
  */
 export async function register(req: Request, res: Response) {
   try {
-    const { 
-      email, 
-      password, 
-      name, 
-      age, 
-      weight, 
-      height, 
-      gender, 
-      activityLevel, 
-      fitnessGoal 
+    const {
+      email,
+      password,
+      name,
+      age,
+      weight,
+      height,
+      gender,
+      activityLevel,
+      fitnessGoal
     } = req.body
 
     if (!email || !password) {
-      return res.status(400).json({ 
-        error: 'Email y contraseña son obligatorios' 
+      return res.status(400).json({
+        error: 'Email y contraseña son obligatorios'
       })
     }
 
     if (password.length < 6) {
-      return res.status(400).json({ 
-        error: 'La contraseña debe tener al menos 6 caracteres' 
+      return res.status(400).json({
+        error: 'La contraseña debe tener al menos 6 caracteres'
       })
     }
 
@@ -48,8 +49,8 @@ export async function register(req: Request, res: Response) {
     })
 
     if (existingUser) {
-      return res.status(409).json({ 
-        error: 'El email ya está registrado' 
+      return res.status(409).json({
+        error: 'El email ya está registrado'
       })
     }
 
@@ -80,8 +81,8 @@ export async function register(req: Request, res: Response) {
     const now = new Date()
     const expiresAt = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000) // 7 días
 
-    const tokenPayload: JWTPayload = { 
-      userId: user.id, 
+    const tokenPayload: JWTPayload = {
+      userId: user.id,
       email: user.email,
       from: now.toISOString(),
       until: expiresAt.toISOString()
@@ -116,8 +117,8 @@ export async function login(req: Request, res: Response) {
     const { email, password } = req.body
 
     if (!email || !password) {
-      return res.status(400).json({ 
-        error: 'Email y contraseña son obligatorios' 
+      return res.status(400).json({
+        error: 'Email y contraseña son obligatorios'
       })
     }
 
@@ -126,24 +127,24 @@ export async function login(req: Request, res: Response) {
     })
 
     if (!user) {
-      return res.status(401).json({ 
-        error: 'Credenciales inválidas' 
+      return res.status(401).json({
+        error: 'Credenciales inválidas'
       })
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password)
 
     if (!isPasswordValid) {
-      return res.status(401).json({ 
-        error: 'Credenciales inválidas' 
+      return res.status(401).json({
+        error: 'Credenciales inválidas'
       })
     }
 
     const now = new Date()
     const expiresAt = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
 
-    const tokenPayload: JWTPayload = { 
-      userId: user.id, 
+    const tokenPayload: JWTPayload = {
+      userId: user.id,
       email: user.email,
       from: now.toISOString(),
       until: expiresAt.toISOString()
@@ -227,14 +228,14 @@ export async function changePassword(req: Request, res: Response) {
     const { currentPassword, newPassword } = req.body
 
     if (!currentPassword || !newPassword) {
-      return res.status(400).json({ 
-        error: 'Contraseña actual y nueva son obligatorias' 
+      return res.status(400).json({
+        error: 'Contraseña actual y nueva son obligatorias'
       })
     }
 
     if (newPassword.length < 6) {
-      return res.status(400).json({ 
-        error: 'La nueva contraseña debe tener al menos 6 caracteres' 
+      return res.status(400).json({
+        error: 'La nueva contraseña debe tener al menos 6 caracteres'
       })
     }
 
@@ -249,8 +250,8 @@ export async function changePassword(req: Request, res: Response) {
     const isPasswordValid = await bcrypt.compare(currentPassword, user.password)
 
     if (!isPasswordValid) {
-      return res.status(401).json({ 
-        error: 'La contraseña actual es incorrecta' 
+      return res.status(401).json({
+        error: 'La contraseña actual es incorrecta'
       })
     }
 
@@ -274,8 +275,8 @@ export async function deleteAccount(req: Request, res: Response) {
     const { password } = req.body
 
     if (!password) {
-      return res.status(400).json({ 
-        error: 'Se requiere la contraseña para eliminar la cuenta' 
+      return res.status(400).json({
+        error: 'Se requiere la contraseña para eliminar la cuenta'
       })
     }
 
@@ -290,8 +291,8 @@ export async function deleteAccount(req: Request, res: Response) {
     const isPasswordValid = await bcrypt.compare(password, user.password)
 
     if (!isPasswordValid) {
-      return res.status(401).json({ 
-        error: 'Contraseña incorrecta' 
+      return res.status(401).json({
+        error: 'Contraseña incorrecta'
       })
     }
 

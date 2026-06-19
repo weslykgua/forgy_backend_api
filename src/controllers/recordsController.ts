@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
 import { PrismaClient } from '@prisma/client'
 
-const prisma = new PrismaClient()
+import prisma from '../config/database'
 
 export async function checkAndUpdateRecords(userId: string, workouts: any[]) {
   for (const workout of workouts) {
@@ -134,11 +134,11 @@ export async function getPersonalRecords(req: Request, res: Response) {
           records: {}
         }
       }
-      
+
       if (!acc[key].records[record.recordType] || record.value > acc[key].records[record.recordType].value) {
         acc[key].records[record.recordType] = record
       }
-      
+
       return acc
     }, {})
 

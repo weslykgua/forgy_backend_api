@@ -3,7 +3,7 @@ import { exercisesDB } from '../data/exercisesData'
 import { workoutLogsDB } from '../data/workoutsData'
 import { dailyProgressDB } from '../data/progressData'
 
-const prisma = new PrismaClient()
+import prisma from '../config/database'
 
 // Definimos explícitamente el tipo de retorno
 const groupLogsByDate = (logs: any[]): Record<string, any[]> => {
@@ -26,13 +26,13 @@ async function migrateData() {
     await prisma.workoutLog.deleteMany({})
     await prisma.routineExercise.deleteMany({})
     await prisma.personalRecord.deleteMany({})
-    
+
     await prisma.trainingSession.deleteMany({})
     await prisma.routine.deleteMany({})
     await prisma.dailyProgress.deleteMany({})
     await prisma.goal.deleteMany({})
     await prisma.bodyMeasurement.deleteMany({})
-    
+
     await prisma.exercise.deleteMany({})
     await prisma.user.deleteMany({})
     console.log('✅ Base de datos limpia.\n')
@@ -70,7 +70,7 @@ async function migrateData() {
 
     // 4. MIGRAR WORKOUTS
     console.log('🏋️ Transformando y migrando entrenamientos...')
-    
+
     const groupedWorkouts = groupLogsByDate(workoutLogsDB)
     let sessionsCount = 0
     let logsCount = 0
@@ -78,10 +78,10 @@ async function migrateData() {
     // CORRECCIÓN PRINCIPAL AQUI:
     for (const [dateStr, logsUnknown] of Object.entries(groupedWorkouts)) {
       // Forzamos a TypeScript a entender que esto es un array
-      const logs = logsUnknown as any[] 
+      const logs = logsUnknown as any[]
 
       const sessionDate = new Date(dateStr)
-      
+
       // Tipamos explícitamente 'acc' y 'log'
       const totalVolume = logs.reduce((acc: number, log: any) => {
         const sets = log.sets as any[]
@@ -98,11 +98,11 @@ async function migrateData() {
           duration: totalDuration,
           totalVolume: totalVolume,
           notes: 'Sesión migrada automáticamente',
-          
+
           workoutLogs: {
             create: logs.map((log: any) => ({
               exerciseId: log.exerciseId,
-              sets: log.sets, 
+              sets: log.sets,
               duration: log.duration || 0,
               notes: log.notes || null,
               completed: true
@@ -110,7 +110,7 @@ async function migrateData() {
           }
         }
       })
-      
+
       sessionsCount++
       logsCount += logs.length
     }
@@ -130,7 +130,7 @@ async function migrateData() {
         mood: p.mood || null,
         notes: p.notes || null
       })),
-      skipDuplicates: true 
+      skipDuplicates: true
     })
     console.log(`✅ ${progressResult.count} registros de progreso migrados.\n`)
 

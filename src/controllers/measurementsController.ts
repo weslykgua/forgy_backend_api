@@ -1,17 +1,17 @@
 import { Request, Response } from 'express'
 import { PrismaClient } from '@prisma/client'
 
-const prisma = new PrismaClient()
+import prisma from '../config/database'
 
 export async function getMeasurements(req: Request, res: Response) {
   try {
-    const userId = req.query.userId as string | undefined
+    const userId = req.body?.token?.userId as string
 
     const data = await prisma.bodyMeasurement.findMany({
       where: userId ? { userId } : undefined,
       orderBy: { date: 'desc' }
     })
-    
+
     res.json(data)
   } catch {
     res.status(500).json({ error: 'Error al obtener mediciones' })

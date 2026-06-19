@@ -4,18 +4,18 @@
 import { Request, Response } from 'express'
 import { PrismaClient } from '@prisma/client'
 
-const prisma = new PrismaClient()
+import prisma from '../config/database'
 
 /**
  * Obtiene las metas del usuario
  */
 export async function getGoals(req: Request, res: Response) {
   try {
-    const userId = req.query.userId as string | undefined
+    const userId = req.body?.token?.userId as string
     const achieved = req.query.achieved as string | undefined
 
     const where: any = {}
-    
+
     if (userId) {
       where.userId = userId
     }
@@ -45,19 +45,19 @@ export async function getGoals(req: Request, res: Response) {
  */
 export async function createGoal(req: Request, res: Response) {
   try {
-    const { 
-      userId, 
-      type, 
-      target, 
-      current, 
-      unit, 
-      deadline, 
-      priority 
+    const {
+      userId,
+      type,
+      target,
+      current,
+      unit,
+      deadline,
+      priority
     } = req.body
 
     if (!userId || !type || target === undefined || current === undefined) {
-      return res.status(400).json({ 
-        error: 'userId, type, target y current son obligatorios' 
+      return res.status(400).json({
+        error: 'userId, type, target y current son obligatorios'
       })
     }
 
@@ -142,7 +142,7 @@ export async function getGoalsProgress(req: Request, res: Response) {
 
     const goalsWithProgress = goals.map((goal: any) => {
       const progress = (goal.current / goal.target) * 100
-      const daysLeft = goal.deadline 
+      const daysLeft = goal.deadline
         ? Math.ceil((new Date(goal.deadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
         : null
 
@@ -150,12 +150,12 @@ export async function getGoalsProgress(req: Request, res: Response) {
         ...goal,
         progress: Math.min(progress, 100),
         daysLeft,
-        status: progress >= 100 
-          ? 'completed' 
-          : daysLeft && daysLeft < 0 
-            ? 'overdue' 
-            : daysLeft && daysLeft <= 7 
-              ? 'urgent' 
+        status: progress >= 100
+          ? 'completed'
+          : daysLeft && daysLeft < 0
+            ? 'overdue'
+            : daysLeft && daysLeft <= 7
+              ? 'urgent'
               : 'on_track'
       }
     })
