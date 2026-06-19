@@ -18,6 +18,7 @@ import { getRoutinesRoutes } from './routes/routinesRoutes'
 import { getAuthRoutes } from './routes/authRoutes'
 import { getUserRoutes } from './routes/userRoutes'
 import { getDashboardRoutes } from './routes/dashboardRoutes'
+import { getGoalRoutes } from './routes/goalRoutes'
 
 // ================= CONFIG =================
 dotenv.config()
@@ -87,6 +88,7 @@ app.use('/progress', getProgressRoutes())
 app.use('/auth', getAuthRoutes())
 app.use('/user', getUserRoutes())
 app.use('/dashboard', getDashboardRoutes())
+app.use('/goals', getGoalRoutes())
 
 // ================= WEBSOCKET =================
 io.on('connection', (socket) => {

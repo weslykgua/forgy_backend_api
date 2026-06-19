@@ -1,0 +1,797 @@
+{
+    "info": {
+        "_postman_id": "3d6d3f8d-4f7c-4d4f-9d2a-f8d1d0d1f001",
+        "name": "Forgy API",
+        "description": "Collection for the currently mounted Forgy backend endpoints.",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Auth",
+            "item": [
+                {
+                    "name": "Register",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/register",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "register"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"demo@forgy.app\",\n  \"password\": \"Secret123!\",\n  \"name\": \"Demo User\"\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Login",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/login",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "login"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"demo@forgy.app\",\n  \"password\": \"Secret123!\"\n}"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "User",
+            "item": [
+                {
+                    "name": "Get Profile",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/user/profile",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "user",
+                                "profile"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Profile",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/user/profile",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "user",
+                                "profile"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"height\": 175,\n  \"weight\": 78\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Get Streak",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/user/streak",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "user",
+                                "streak"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Dashboard",
+            "item": [
+                {
+                    "name": "Get Dashboard",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/dashboard",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "dashboard"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Exercises",
+            "item": [
+                {
+                    "name": "List Exercises",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/exercises",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "exercises"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Exercise Stats",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/exercises/stats",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "exercises",
+                                "stats"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Goals",
+            "item": [
+                {
+                    "name": "Get Plan",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/goals/plan",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "goals",
+                                "plan"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Save Plan",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/goals/plan",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "goals",
+                                "plan"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"age\": 25,\n  \"weight\": 70,\n  \"height\": 170,\n  \"sex\": \"male\",\n  \"goal\": \"maintain\",\n  \"daysPerWeek\": 3,\n  \"minutesPerDay\": 45,\n  \"equipment\": [\"peso_corporal\"],\n  \"injuries\": \"\"\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Delete Plan",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/goals/plan",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "goals",
+                                "plan"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "List Goals",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/goals",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "goals"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Goal",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/goals",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "goals"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"type\": \"strength\",\n  \"target\": 100,\n  \"current\": 60,\n  \"unit\": \"kg\",\n  \"priority\": \"high\"\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Update Goal",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/goals/{{goalId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "goals",
+                                "{{goalId}}"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"current\": 70,\n  \"priority\": \"medium\"\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Delete Goal",
+                    "request": {
+                        "method": "DELETE",
+                        "url": {
+                            "raw": "{{baseUrl}}/goals/{{goalId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "goals",
+                                "{{goalId}}"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Progress",
+            "item": [
+                {
+                    "name": "Upsert Progress",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/progress",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "progress"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"date\": \"2026-06-18\",\n  \"weight\": 78.5,\n  \"waterIntake\": 2000,\n  \"caloriesConsumed\": 2200,\n  \"caloriesBurned\": 500,\n  \"sleepHours\": 7.5,\n  \"mood\": \"good\",\n  \"energy\": 4,\n  \"stress\": 2,\n  \"notes\": \"Buen día\"\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Get Progress History",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/progress?days=30",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "progress"
+                            ],
+                            "query": [
+                                {
+                                    "key": "days",
+                                    "value": "30"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Progress Stats",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/progress/stats",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "progress",
+                                "stats"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Workouts",
+            "item": [
+                {
+                    "name": "Create Workout Session",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/workouts",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "workouts"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"date\": \"2026-06-18\",\n  \"routineId\": \"{{routineId}}\",\n  \"duration\": 45,\n  \"rating\": 4,\n  \"notes\": \"Buen entrenamiento\",\n  \"workouts\": [\n    {\n      \"exerciseId\": \"{{exerciseId}}\",\n      \"duration\": 15,\n      \"notes\": \"Primera serie\",\n      \"sets\": [\n        { \"reps\": 12, \"weight\": 20, \"completed\": true },\n        { \"reps\": 10, \"weight\": 22.5, \"completed\": true }\n      ]\n    }\n  ]\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Get Workouts By Date",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/workouts?date=2026-06-18",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "workouts"
+                            ],
+                            "query": [
+                                {
+                                    "key": "date",
+                                    "value": "2026-06-18"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Workout Calendar",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/workouts/calendar",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "workouts",
+                                "calendar"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Workout",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/workouts/{{workoutId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "workouts",
+                                "{{workoutId}}"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"date\": \"2026-06-18\",\n  \"duration\": 50,\n  \"notes\": \"Actualizado\",\n  \"workouts\": [\n    {\n      \"exerciseId\": \"{{exerciseId}}\",\n      \"duration\": 20,\n      \"sets\": [\n        { \"reps\": 10, \"weight\": 25, \"completed\": true }\n      ]\n    }\n  ]\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Delete Workout",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/workouts/{{workoutId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "workouts",
+                                "{{workoutId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Workout History",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/workouts/history?limit=10",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "workouts",
+                                "history"
+                            ],
+                            "query": [
+                                {
+                                    "key": "limit",
+                                    "value": "10"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Workout Streak",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/workouts/streak/{{userId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "workouts",
+                                "streak",
+                                "{{userId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Personal Records",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/workouts/records/{{userId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "workouts",
+                                "records",
+                                "{{userId}}"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Routines",
+            "item": [
+                {
+                    "name": "List Routines",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/routines",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "routines"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Routine",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/routines",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "routines"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Push Day\",\n  \"description\": \"Rutina de empuje\",\n  \"type\": \"workout\",\n  \"difficulty\": \"intermediate\"\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Update Routine",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/routines/{{routineId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "routines",
+                                "{{routineId}}"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Upper Body\",\n  \"difficulty\": \"advanced\"\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Delete Routine",
+                    "request": {
+                        "method": "DELETE",
+                        "url": {
+                            "raw": "{{baseUrl}}/routines/{{routineId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "routines",
+                                "{{routineId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Add Exercise To Routine",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/routines/{{routineId}}/exercises",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "routines",
+                                "{{routineId}}",
+                                "exercises"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"exerciseId\": \"{{exerciseId}}\",\n  \"order\": 1,\n  \"targetSets\": 4,\n  \"targetReps\": 10,\n  \"targetWeight\": 40,\n  \"restTime\": 90,\n  \"notes\": \"Foco en técnica\"\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Remove Exercise From Routine",
+                    "request": {
+                        "method": "DELETE",
+                        "url": {
+                            "raw": "{{baseUrl}}/routines/{{routineId}}/exercises/{{exerciseId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "routines",
+                                "{{routineId}}",
+                                "exercises",
+                                "{{exerciseId}}"
+                            ]
+                        }
+                    }
+                }
+            ]
+        }
+    ]
+}

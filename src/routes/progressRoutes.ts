@@ -1,8 +1,10 @@
 import { Router } from 'express'
 import {
   upsertProgress,
-  getProgressHistory
+  getProgressHistory,
+  getProgressStats
 } from '../controllers/progressController'
+import { validateToken } from '../controllers/authenticationController'
 
 export function getProgressRoutes(): Router {
   const router = Router()
@@ -23,6 +25,7 @@ export function getProgressRoutes(): Router {
    * }
    * Crea o actualiza el progreso diario
    */
+  router.use(validateToken)
   router.post('/', upsertProgress)
 
   /**
@@ -31,6 +34,12 @@ export function getProgressRoutes(): Router {
    * Obtiene el historial de progreso diario
    */
   router.get('/', getProgressHistory)
+
+  /**
+   * GET /api/progress/stats
+   * Obtiene estadísticas resumidas del progreso del usuario
+   */
+  router.get('/stats', getProgressStats)
 
   return router
 }
