@@ -10,28 +10,34 @@ interface TokenData {
   until: string
 }
 
+function attachToken(req: Request, tokenData: TokenData) {
+  req.body = req.body ?? {}
+  req.body.token = {
+    userId: tokenData.userId,
+    email: tokenData.email,
+    from: tokenData.from,
+    until: tokenData.until,
+  }
+}
+
 /**
  * Middleware para validar token JWT
  * Compatible con tu estructura existente
  */
 export function validateToken(req: Request, res: Response, next: NextFunction) {
   try {
-    // Obtener token del header
     const authHeader = req.headers.authorization as string | undefined
 
     if (!authHeader) {
       return res.status(401).json({ error: 'No tiene permiso' })
     }
 
-    // Extraer el token (Bearer TOKEN o solo TOKEN)
-    const token = authHeader.startsWith('Bearer ') 
-      ? authHeader.substring(7) 
+    const token = authHeader.startsWith('Bearer ')
+      ? authHeader.substring(7)
       : authHeader
 
-    // Verificar y decodificar token
     const decoded = jwt.verify(token, JWT_SECRET) as TokenData
 
-    // Verificar si el token ha expirado
     const now = new Date()
     const until = new Date(decoded.until)
 
@@ -39,20 +45,14 @@ export function validateToken(req: Request, res: Response, next: NextFunction) {
       return res.status(401).json({ error: 'Token expirado' })
     }
 
-    console.log('Token validado:', decoded)
-
-    // Agregar token decodificado al body (compatible con tu estructura)
-    req.body.token = {
-      userId: decoded.userId,
-      email: decoded.email,
-      from: decoded.from,
-      until: decoded.until
-    }
+    attachToken(req, decoded)
 
     next()
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error validando token:', error)
-    return res.status(401).json({ error: 'Token inválido' })
+    return res.status(401).json({
+      error: error.message || 'Token inválido'
+    })
   }
 }
 
@@ -64,27 +64,20 @@ export function optionalToken(req: Request, res: Response, next: NextFunction) {
     const authHeader = req.headers.authorization as string | undefined
 
     if (authHeader) {
-      const token = authHeader.startsWith('Bearer ') 
-        ? authHeader.substring(7) 
+      const token = authHeader.startsWith('Bearer ')
+        ? authHeader.substring(7)
         : authHeader
 
       try {
         const decoded = jwt.verify(token, JWT_SECRET) as TokenData
-        
-        req.body.token = {
-          userId: decoded.userId,
-          email: decoded.email,
-          from: decoded.from,
-          until: decoded.until
-        }
-      } catch (error) {
-        // Token inválido, pero continuamos sin autenticación
+        attachToken(req, decoded)
+      } catch {
         console.log('Token opcional inválido, continuando sin auth')
       }
     }
 
     next()
-  } catch (error) {
+  } catch {
     next()
   }
 }
