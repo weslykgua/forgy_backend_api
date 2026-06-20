@@ -61,3 +61,14 @@ export async function getExerciseStats(req: Request, res: Response) {
     res.status(500).json({ error: 'Error al generar estadísticas' })
   }
 }
+
+export async function seedExercises(req: Request, res: Response) {
+  try {
+    const { seedExercisesIfNeeded } = require('../utils/seeder')
+    const force = req.query.force === 'true'
+    await seedExercisesIfNeeded(force)
+    res.json({ success: true, message: 'Ejercicios sembrados exitosamente' })
+  } catch (error: any) {
+    res.status(500).json({ error: 'Error al sembrar la base de datos: ' + error.message })
+  }
+}

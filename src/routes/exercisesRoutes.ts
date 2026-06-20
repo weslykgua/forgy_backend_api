@@ -1,7 +1,8 @@
 import { Router } from 'express'
 import {
   getExercises,
-  getExerciseStats
+  getExerciseStats,
+  seedExercises
 } from '../controllers/exercisesController'
 
 export function getExercisesRoutes(): Router {
@@ -9,6 +10,7 @@ export function getExercisesRoutes(): Router {
 
   router.get('/', getExercises)
   router.get('/stats', getExerciseStats)
+  router.post('/seed', seedExercises)
 
   return router
 }
