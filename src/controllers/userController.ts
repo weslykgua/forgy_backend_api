@@ -196,7 +196,10 @@ export async function getProfile(req: Request, res: Response) {
     res.json(userWithoutPassword)
   } catch (error) {
     console.error('Error al obtener perfil:', error)
-    res.status(500).json({ error: 'Error al obtener perfil' })
+    res.status(500).json({
+      error: 'Error al obtener perfil',
+      details: error instanceof Error ? error.message : String(error)
+    })
   }
 }
 
@@ -218,7 +221,10 @@ export async function updateProfile(req: Request, res: Response) {
     })
   } catch (error) {
     console.error('Error al actualizar perfil:', error)
-    res.status(500).json({ error: 'Error al actualizar perfil' })
+    res.status(500).json({
+      error: 'Error al actualizar perfil',
+      details: error instanceof Error ? error.message : String(error)
+    })
   }
 }
 
@@ -265,7 +271,10 @@ export async function changePassword(req: Request, res: Response) {
     res.json({ message: 'Contraseña cambiada exitosamente' })
   } catch (error) {
     console.error('Error al cambiar contraseña:', error)
-    res.status(500).json({ error: 'Error al cambiar contraseña' })
+    res.status(500).json({
+      error: 'Error al cambiar contraseña',
+      details: error instanceof Error ? error.message : String(error)
+    })
   }
 }
 
@@ -303,6 +312,9 @@ export async function deleteAccount(req: Request, res: Response) {
     res.json({ message: 'Cuenta eliminada exitosamente' })
   } catch (error) {
     console.error('Error al eliminar cuenta:', error)
-    res.status(500).json({ error: 'Error al eliminar cuenta' })
+    res.status(500).json({
+      error: 'Error al eliminar cuenta',
+      details: error instanceof Error ? error.message : String(error)
+    })
   }
 }
