@@ -231,6 +231,14 @@ model DailyProgress {
   mood             String?  // great, good, okay, bad, terrible
   energy           Int?     // 1-5
   stress           Int?     // 1-5
+  muscleSoreness   Int?     // 1-5 (dolor muscular)
+  proteinConsumed  Int?     // g
+  carbsConsumed    Int?     // g
+  fatConsumed      Int?     // g
+  heartRate        Int?     // lpm
+  vo2Max           Float?
+  bodyFat          Float?   // %
+  muscleMass       Float?   // kg
   notes            String?
   
   // Calculado automáticamente

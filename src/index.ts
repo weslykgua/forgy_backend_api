@@ -93,7 +93,7 @@ const PORT = process.env.PORT || 3000
 // Limitar peticiones para evitar fuerza bruta y DDoS
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 150, // Máximo 150 peticiones por IP cada 15 minutos
+  max: 2000, // Máximo 2000 peticiones por IP cada 15 minutos (aumentado)
   message: { success: false, message: 'Demasiadas peticiones desde esta IP, intenta de nuevo más tarde.' },
 })
 

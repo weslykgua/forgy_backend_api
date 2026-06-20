@@ -1,0 +1,9 @@
+-- AlterTable
+ALTER TABLE "daily_progress" ADD COLUMN "muscleSoreness" INTEGER,
+ADD COLUMN "proteinConsumed" INTEGER,
+ADD COLUMN "carbsConsumed" INTEGER,
+ADD COLUMN "fatConsumed" INTEGER,
+ADD COLUMN "heartRate" INTEGER,
+ADD COLUMN "vo2Max" DOUBLE PRECISION,
+ADD COLUMN "bodyFat" DOUBLE PRECISION,
+ADD COLUMN "muscleMass" DOUBLE PRECISION;
