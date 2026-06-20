@@ -32,18 +32,56 @@ const httpServer = createServer(app)
 app.set('trust proxy', 1)
 
 // Orígenes permitidos (URLs de tu frontend en producción y desarrollo)
-// Se limpia la barra final (/) en caso de que la variable de entorno la traiga por error
-const frontendUrl = (process.env.FRONTEND_URL || 'http://localhost:5173').replace(/\/$/, '')
-
 const allowedOrigins = [
-  frontendUrl,
-  'https://forgy-mobile-app.vercel.app', // Agregado directamente para máxima seguridad
-  'http://localhost:8100' // Puerto de Ionic
+  'https://forgy-mobile-app.vercel.app',
+  'http://localhost:5173',
+  'http://localhost:8100',
+  'http://localhost:3000'
 ]
+
+if (process.env.FRONTEND_URL) {
+  let url = process.env.FRONTEND_URL.trim()
+  if (!url.startsWith('http://') && !url.startsWith('https://')) {
+    url = `https://${url}`
+  }
+  url = url.replace(/\/$/, '')
+  if (!allowedOrigins.includes(url)) {
+    allowedOrigins.push(url)
+  }
+}
+
+// Función para validar orígenes dinámicos en desarrollo y Vercel
+const corsOriginChecker = (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+  // Permitir peticiones sin origen (ej. apps móviles híbridas nativas, curl, postman)
+  if (!origin) {
+    callback(null, true)
+    return
+  }
+
+  // Comprobar si el origen está en el array permitido
+  if (allowedOrigins.includes(origin)) {
+    callback(null, true)
+    return
+  }
+
+  // Permitir cualquier puerto local en desarrollo
+  if (/^http:\/\/localhost:\d+$/.test(origin) || /^http:\/\/127\.0\.0\.1:\d+$/.test(origin)) {
+    callback(null, true)
+    return
+  }
+
+  // Permitir subdominios de Vercel (para URLs de preview en Vercel)
+  if (origin.endsWith('.vercel.app')) {
+    callback(null, true)
+    return
+  }
+
+  callback(new Error('Not allowed by CORS'))
+}
 
 const io = new Server(httpServer, {
   cors: {
-    origin: allowedOrigins,
+    origin: corsOriginChecker,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     credentials: true
   },
@@ -61,7 +99,7 @@ const limiter = rateLimit({
 
 app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }))
 app.use(compression())
-app.use(cors({ origin: allowedOrigins, credentials: true }))
+app.use(cors({ origin: corsOriginChecker, credentials: true }))
 app.use(limiter)
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
