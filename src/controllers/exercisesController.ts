@@ -9,6 +9,9 @@ export async function getExercises(req: Request, res: Response) {
     const difficulty = req.query.difficulty as string | undefined
     const search = req.query.search as string | undefined
     const category = req.query.category as string | undefined
+    const page = parseInt(req.query.page as string || '1', 10)
+    const limit = parseInt(req.query.limit as string || '50', 10)
+    const paginate = req.query.paginate !== 'false' // default to paginated
 
     const where: any = {}
 
@@ -31,8 +34,25 @@ export async function getExercises(req: Request, res: Response) {
       ]
     }
 
-    const exercises = await prisma.exercise.findMany({ where })
-    res.json(exercises)
+    if (!paginate) {
+      // Legacy: return all (for backward compat with routines hydration)
+      const exercises = await prisma.exercise.findMany({ where, select: { id: true, name: true, muscle: true, difficulty: true, equipment: true } })
+      return res.json(exercises)
+    }
+
+    const skip = (page - 1) * limit
+    const [exercises, total] = await Promise.all([
+      prisma.exercise.findMany({ where, skip, take: limit, orderBy: { name: 'asc' } }),
+      prisma.exercise.count({ where })
+    ])
+
+    res.json({
+      data: exercises,
+      total,
+      page,
+      limit,
+      hasMore: skip + exercises.length < total
+    })
   } catch {
     res.status(500).json({ error: 'Error al obtener ejercicios' })
   }
