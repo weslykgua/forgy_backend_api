@@ -11,7 +11,7 @@ function getDateKey(date: Date) {
 
 export async function upsertProgress(req: Request, res: Response) {
   try {
-    const { date, ...data } = req.body
+    const { date, token, userId: bodyUserId, ...data } = req.body
     const userId = resolveUserId(req)
 
     if (!userId) {
