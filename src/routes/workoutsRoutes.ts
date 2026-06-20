@@ -64,17 +64,17 @@ export function getWorkoutsRoutes(): Router {
   router.get('/history', validateToken, getWorkoutHistory)
 
   /**
-   * GET /api/workouts/streak/:userId
+   * GET /api/workouts/streak
    * Obtiene la racha actual y mejor racha del usuario
    */
-  router.get('/streak/:userId', validateToken, getWorkoutStreak)
+  router.get('/streak', validateToken, getWorkoutStreak)
 
   /**
-   * GET /api/workouts/records/:userId
+   * GET /api/workouts/records
    * Query params: exerciseId? (opcional para filtrar por ejercicio)
    * Obtiene los récords personales del usuario
    */
-  router.get('/records/:userId', validateToken, getPersonalRecords)
+  router.get('/records', validateToken, getPersonalRecords)
 
   return router
 }

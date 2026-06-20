@@ -27,6 +27,11 @@ function attachToken(req: Request, tokenData: TokenData) {
  */
 export function validateToken(req: Request, res: Response, next: NextFunction) {
   try {
+    // Sanitize req.body.token to prevent parameter injection
+    if (req.body && 'token' in req.body) {
+      delete req.body.token
+    }
+
     const authHeader = req.headers.authorization as string | undefined
 
     if (!authHeader) {
@@ -62,6 +67,11 @@ export function validateToken(req: Request, res: Response, next: NextFunction) {
  */
 export function optionalToken(req: Request, res: Response, next: NextFunction) {
   try {
+    // Sanitize req.body.token to prevent parameter injection
+    if (req.body && 'token' in req.body) {
+      delete req.body.token
+    }
+
     const authHeader = req.headers.authorization as string | undefined
 
     if (authHeader) {

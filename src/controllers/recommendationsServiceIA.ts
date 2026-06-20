@@ -18,7 +18,7 @@ interface UserData {
  */
 export async function generateRecommendations(req: Request, res: Response) {
   try {
-    const userId = req.params.userId as string
+    const userId = req.body.token.userId as string
 
     // Obtener todos los datos relevantes del usuario
     const userData = await gatherUserData(userId)
@@ -59,7 +59,7 @@ export async function generateRecommendations(req: Request, res: Response) {
  */
 export async function getRecommendations(req: Request, res: Response) {
   try {
-    const userId = req.params.userId as string
+    const userId = req.body.token.userId as string
     const status = (req.query.status as string) || 'pending'
 
     const recommendations = await prisma.aIRecommendation.findMany({
@@ -89,7 +89,16 @@ export async function getRecommendations(req: Request, res: Response) {
 export async function updateRecommendationStatus(req: Request, res: Response) {
   try {
     const id = req.params.id as string
+    const userId = req.body.token.userId as string
     const { status } = req.body
+
+    const existingRec = await prisma.aIRecommendation.findUnique({
+      where: { id }
+    })
+
+    if (!existingRec || existingRec.userId !== userId) {
+      return res.status(404).json({ error: 'Recomendación no encontrada' })
+    }
 
     const recommendation = await prisma.aIRecommendation.update({
       where: { id },
@@ -101,7 +110,7 @@ export async function updateRecommendationStatus(req: Request, res: Response) {
 
     res.json(recommendation)
   } catch {
-    res.status(404).json({ error: 'Recomendación no encontrada' })
+    res.status(400).json({ error: 'Error al actualizar recomendación' })
   }
 }
 

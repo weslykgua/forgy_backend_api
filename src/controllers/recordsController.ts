@@ -15,7 +15,7 @@ export async function checkAndUpdateRecords(userId: string, workouts: any[]) {
     let totalVolume = 0
 
     sets.forEach((set: any) => {
-      if (set.completed) {
+      if (set.completed !== false) {
         const weight = set.weight || 0
         const reps = set.reps || 0
 
@@ -111,7 +111,7 @@ export async function checkAndUpdateRecords(userId: string, workouts: any[]) {
 
 export async function getPersonalRecords(req: Request, res: Response) {
   try {
-    const userId = req.params.userId as string
+    const userId = req.body.token.userId as string
     const exerciseId = req.query.exerciseId as string | undefined
 
     const where: any = { userId }

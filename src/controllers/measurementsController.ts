@@ -5,10 +5,10 @@ import prisma from '../config/database'
 
 export async function getMeasurements(req: Request, res: Response) {
   try {
-    const userId = req.body?.token?.userId as string
+    const userId = req.body.token.userId as string
 
     const data = await prisma.bodyMeasurement.findMany({
-      where: userId ? { userId } : undefined,
+      where: { userId },
       orderBy: { date: 'desc' }
     })
 
@@ -20,10 +20,11 @@ export async function getMeasurements(req: Request, res: Response) {
 
 export async function createMeasurement(req: Request, res: Response) {
   try {
+    const userId = req.body.token.userId as string
     const measurement = await prisma.bodyMeasurement.create({
       data: {
         date: new Date(req.body.date),
-        userId: req.body.userId,
+        userId,
         weight: req.body.weight,
         bodyFat: req.body.bodyFat,
         chest: req.body.chest,

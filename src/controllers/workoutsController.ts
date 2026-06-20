@@ -145,7 +145,7 @@ export async function createWorkout(req: Request, res: Response) {
 
 export async function getWorkoutHistory(req: Request, res: Response) {
   try {
-    const userId = (req.query.userId as string | undefined) ?? resolveUserId(req)
+    const userId = resolveUserId(req)
     const limit = Number(req.query.limit) || 10
 
     if (!userId) {

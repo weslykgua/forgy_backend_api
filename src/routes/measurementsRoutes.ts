@@ -3,22 +3,21 @@ import {
   getMeasurements,
   createMeasurement
 } from '../controllers/measurementsController'
+import { validateToken } from '../controllers/authenticationController'
 
 export function getMeasurementsRoutes(): Router {
   const router = Router()
 
   /**
    * GET /api/measurements
-   * Query params: userId
-   * Obtiene todas las mediciones corporales
+   * Obtiene todas las mediciones corporales del usuario autenticado
    */
-  router.get('/', getMeasurements)
+  router.get('/', validateToken, getMeasurements)
 
   /**
    * POST /api/measurements
    * Body: {
    *   date, 
-   *   userId,
    *   weight?, 
    *   bodyFat?, 
    *   chest?, 
@@ -32,8 +31,8 @@ export function getMeasurementsRoutes(): Router {
    *   neck?, 
    *   shoulders?
    * }
-   * Registra una nueva medición corporal
+   * Registra una nueva medición corporal para el usuario autenticado
    */
-  router.post('/', createMeasurement)
+  router.post('/', validateToken, createMeasurement)
   return router
 }

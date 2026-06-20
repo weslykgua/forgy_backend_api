@@ -11,14 +11,10 @@ import prisma from '../config/database'
  */
 export async function getGoals(req: Request, res: Response) {
   try {
-    const userId = req.body?.token?.userId as string
+    const userId = req.body.token.userId as string
     const achieved = req.query.achieved as string | undefined
 
-    const where: any = {}
-
-    if (userId) {
-      where.userId = userId
-    }
+    const where: any = { userId }
 
     if (achieved !== undefined) {
       where.achieved = achieved === 'true'
@@ -45,8 +41,8 @@ export async function getGoals(req: Request, res: Response) {
  */
 export async function createGoal(req: Request, res: Response) {
   try {
+    const userId = req.body.token.userId as string
     const {
-      userId,
       type,
       target,
       current,
@@ -55,9 +51,9 @@ export async function createGoal(req: Request, res: Response) {
       priority
     } = req.body
 
-    if (!userId || !type || target === undefined || current === undefined) {
+    if (!type || target === undefined || current === undefined) {
       return res.status(400).json({
-        error: 'userId, type, target y current son obligatorios'
+        error: 'type, target y current son obligatorios'
       })
     }
 
@@ -86,7 +82,16 @@ export async function createGoal(req: Request, res: Response) {
 export async function updateGoal(req: Request, res: Response) {
   try {
     const id = req.params.id as string
+    const userId = req.body.token.userId as string
     const { current, target, deadline, achieved, priority } = req.body
+
+    const existingGoal = await prisma.goal.findUnique({
+      where: { id }
+    })
+
+    if (!existingGoal || existingGoal.userId !== userId) {
+      return res.status(404).json({ error: 'Meta no encontrada' })
+    }
 
     const data: any = {}
 
@@ -104,7 +109,7 @@ export async function updateGoal(req: Request, res: Response) {
     res.json(goal)
   } catch (error) {
     console.error(error)
-    res.status(404).json({ error: 'Meta no encontrada' })
+    res.status(400).json({ error: 'Error al actualizar meta' })
   }
 }
 
@@ -114,6 +119,15 @@ export async function updateGoal(req: Request, res: Response) {
 export async function deleteGoal(req: Request, res: Response) {
   try {
     const id = req.params.id as string
+    const userId = req.body.token.userId as string
+
+    const existingGoal = await prisma.goal.findUnique({
+      where: { id }
+    })
+
+    if (!existingGoal || existingGoal.userId !== userId) {
+      return res.status(404).json({ error: 'Meta no encontrada' })
+    }
 
     await prisma.goal.delete({
       where: { id }
@@ -122,7 +136,7 @@ export async function deleteGoal(req: Request, res: Response) {
     res.json({ message: 'Meta eliminada correctamente' })
   } catch (error) {
     console.error(error)
-    res.status(404).json({ error: 'Meta no encontrada' })
+    res.status(400).json({ error: 'Error al eliminar meta' })
   }
 }
 
@@ -131,7 +145,7 @@ export async function deleteGoal(req: Request, res: Response) {
  */
 export async function getGoalsProgress(req: Request, res: Response) {
   try {
-    const userId = req.params.userId as string
+    const userId = req.body.token.userId as string
 
     const goals = await prisma.goal.findMany({
       where: {

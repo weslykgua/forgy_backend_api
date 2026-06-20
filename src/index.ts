@@ -19,6 +19,8 @@ import { getAuthRoutes } from './routes/authRoutes'
 import { getUserRoutes } from './routes/userRoutes'
 import { getDashboardRoutes } from './routes/dashboardRoutes'
 import { getGoalRoutes } from './routes/goalRoutes'
+import { getMeasurementsRoutes } from './routes/measurementsRoutes'
+import { getRecommendationsRoutes } from './routes/recommendationsServiceIA'
 
 // ================= CONFIG =================
 dotenv.config()
@@ -89,6 +91,8 @@ app.use('/auth', getAuthRoutes())
 app.use('/user', getUserRoutes())
 app.use('/dashboard', getDashboardRoutes())
 app.use('/goals', getGoalRoutes())
+app.use('/measurements', getMeasurementsRoutes())
+app.use('/ai', getRecommendationsRoutes())
 
 // ================= WEBSOCKET =================
 io.on('connection', (socket) => {

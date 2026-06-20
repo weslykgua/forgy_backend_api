@@ -5,10 +5,10 @@ import prisma from '../config/database'
 
 export async function getRoutines(req: Request, res: Response) {
   try {
-    const userId = req.body?.token?.userId as string
+    const userId = req.body.token.userId as string
 
     const routines = await prisma.routine.findMany({
-      where: userId ? { userId } : undefined,
+      where: { userId },
       include: {
         exercises: {
           include: { exercise: true },
@@ -42,23 +42,29 @@ export async function createRoutine(req: Request, res: Response) {
         userId: token.userId,
         type: "workout",
         description: description
-        //difficulty: difficulty
       }
     })
-    // ToDo convertir userId desde json web token
     res.status(201).json(routine)
   } catch (error: any) {
     console.error(error)
     res.status(500).json({ error: 'Error al crear rutina', details: error.message })
     console.log("Rutina, error", error);
-
   }
 }
 
 export async function updateRoutine(req: Request, res: Response) {
   try {
     const id = req.params.id as string
+    const userId = req.body.token.userId as string
     const { name, description, isFavorite, difficulty } = req.body
+
+    const existingRoutine = await prisma.routine.findUnique({
+      where: { id }
+    })
+
+    if (!existingRoutine || existingRoutine.userId !== userId) {
+      return res.status(404).json({ error: 'Rutina no encontrada' })
+    }
 
     const routine = await prisma.routine.update({
       where: { id },
@@ -67,14 +73,23 @@ export async function updateRoutine(req: Request, res: Response) {
 
     res.json(routine)
   } catch {
-    res.status(404).json({ error: 'Rutina no encontrada' })
+    res.status(400).json({ error: 'Error al actualizar rutina' })
   }
 }
 
 export async function addExerciseToRoutine(req: Request, res: Response) {
   try {
     const id = req.params.id as string
+    const userId = req.body.token.userId as string
     const { exerciseId, order, targetSets, targetReps, targetWeight, restTime, notes } = req.body
+
+    const existingRoutine = await prisma.routine.findUnique({
+      where: { id }
+    })
+
+    if (!existingRoutine || existingRoutine.userId !== userId) {
+      return res.status(404).json({ error: 'Rutina no encontrada' })
+    }
 
     const routineExercise = await prisma.routineExercise.create({
       data: {
@@ -98,7 +113,16 @@ export async function addExerciseToRoutine(req: Request, res: Response) {
 export async function removeExerciseFromRoutine(req: Request, res: Response) {
   try {
     const id = req.params.id as string
+    const userId = req.body.token.userId as string
     const exerciseId = req.params.exerciseId as string
+
+    const existingRoutine = await prisma.routine.findUnique({
+      where: { id }
+    })
+
+    if (!existingRoutine || existingRoutine.userId !== userId) {
+      return res.status(404).json({ error: 'Rutina no encontrada' })
+    }
 
     await prisma.routineExercise.deleteMany({
       where: {
@@ -116,6 +140,16 @@ export async function removeExerciseFromRoutine(req: Request, res: Response) {
 export async function deleteRoutine(req: Request, res: Response) {
   try {
     const id = req.params.id as string
+    const userId = req.body.token.userId as string
+
+    const existingRoutine = await prisma.routine.findUnique({
+      where: { id }
+    })
+
+    if (!existingRoutine || existingRoutine.userId !== userId) {
+      return res.status(404).json({ error: 'Rutina no encontrada' })
+    }
+
     await prisma.routine.delete({ where: { id } })
     res.json({ message: 'Rutina eliminada' })
   } catch {

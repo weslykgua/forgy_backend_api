@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "3d6d3f8d-4f7c-4d4f-9d2a-f8d1d0d1f001",
     "name": "Forgy API",
-    "description": "Collection for the currently mounted Forgy backend endpoints.",
+    "description": "Colección completa para probar los endpoints del backend de Forgy, actualizados con validación de tokens y control de propiedad.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -57,7 +57,37 @@
             "url": { "raw": "{{baseUrl}}/user/profile", "host": ["{{baseUrl}}"], "path": ["user", "profile"] },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"height\": 175,\n  \"weight\": 78\n}"
+              "raw": "{\n  \"name\": \"Demo User Updated\",\n  \"age\": 26,\n  \"height\": 175,\n  \"weight\": 78,\n  \"gender\": \"male\",\n  \"activityLevel\": \"active\",\n  \"fitnessGoal\": \"gain_muscle\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/user/change-password", "host": ["{{baseUrl}}"], "path": ["user", "change-password"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"Secret123!\",\n  \"newPassword\": \"NewSecret123!\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Account",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/user", "host": ["{{baseUrl}}"], "path": ["user"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"password\": \"NewSecret123!\"\n}"
             }
           }
         },
@@ -141,18 +171,30 @@
           "name": "List Goals",
           "request": {
             "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
             "url": { "raw": "{{baseUrl}}/goals", "host": ["{{baseUrl}}"], "path": ["goals"] }
+          }
+        },
+        {
+          "name": "Get Goals Progress",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/goals/progress", "host": ["{{baseUrl}}"], "path": ["goals", "progress"] }
           }
         },
         {
           "name": "Create Goal",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
             "url": { "raw": "{{baseUrl}}/goals", "host": ["{{baseUrl}}"], "path": ["goals"] },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"type\": \"strength\",\n  \"target\": 100,\n  \"current\": 60,\n  \"unit\": \"kg\",\n  \"priority\": \"high\"\n}"
+              "raw": "{\n  \"type\": \"weight_loss\",\n  \"target\": 72,\n  \"current\": 78.5,\n  \"unit\": \"kg\",\n  \"priority\": \"high\"\n}"
             }
           }
         },
@@ -160,11 +202,14 @@
           "name": "Update Goal",
           "request": {
             "method": "PUT",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
             "url": { "raw": "{{baseUrl}}/goals/{{goalId}}", "host": ["{{baseUrl}}"], "path": ["goals", "{{goalId}}"] },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"current\": 70,\n  \"priority\": \"medium\"\n}"
+              "raw": "{\n  \"current\": 75.5,\n  \"priority\": \"medium\"\n}"
             }
           }
         },
@@ -172,6 +217,7 @@
           "name": "Delete Goal",
           "request": {
             "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
             "url": { "raw": "{{baseUrl}}/goals/{{goalId}}", "host": ["{{baseUrl}}"], "path": ["goals", "{{goalId}}"] }
           }
         }
@@ -283,7 +329,7 @@
           "request": {
             "method": "GET",
             "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
-            "url": { "raw": "{{baseUrl}}/workouts/streak/{{userId}}", "host": ["{{baseUrl}}"], "path": ["workouts", "streak", "{{userId}}"] }
+            "url": { "raw": "{{baseUrl}}/workouts/streak", "host": ["{{baseUrl}}"], "path": ["workouts", "streak"] }
           }
         },
         {
@@ -291,7 +337,7 @@
           "request": {
             "method": "GET",
             "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
-            "url": { "raw": "{{baseUrl}}/workouts/records/{{userId}}", "host": ["{{baseUrl}}"], "path": ["workouts", "records", "{{userId}}"] }
+            "url": { "raw": "{{baseUrl}}/workouts/records", "host": ["{{baseUrl}}"], "path": ["workouts", "records"] }
           }
         }
       ]
@@ -303,6 +349,7 @@
           "name": "List Routines",
           "request": {
             "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
             "url": { "raw": "{{baseUrl}}/routines", "host": ["{{baseUrl}}"], "path": ["routines"] }
           }
         },
@@ -325,7 +372,10 @@
           "name": "Update Routine",
           "request": {
             "method": "PUT",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
             "url": { "raw": "{{baseUrl}}/routines/{{routineId}}", "host": ["{{baseUrl}}"], "path": ["routines", "{{routineId}}"] },
             "body": {
               "mode": "raw",
@@ -337,6 +387,7 @@
           "name": "Delete Routine",
           "request": {
             "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
             "url": { "raw": "{{baseUrl}}/routines/{{routineId}}", "host": ["{{baseUrl}}"], "path": ["routines", "{{routineId}}"] }
           }
         },
@@ -344,7 +395,10 @@
           "name": "Add Exercise To Routine",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
             "url": { "raw": "{{baseUrl}}/routines/{{routineId}}/exercises", "host": ["{{baseUrl}}"], "path": ["routines", "{{routineId}}", "exercises"] },
             "body": {
               "mode": "raw",
@@ -356,7 +410,72 @@
           "name": "Remove Exercise From Routine",
           "request": {
             "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
             "url": { "raw": "{{baseUrl}}/routines/{{routineId}}/exercises/{{exerciseId}}", "host": ["{{baseUrl}}"], "path": ["routines", "{{routineId}}", "exercises", "{{exerciseId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Measurements",
+      "item": [
+        {
+          "name": "List Measurements",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/measurements", "host": ["{{baseUrl}}"], "path": ["measurements"] }
+          }
+        },
+        {
+          "name": "Create Measurement",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/measurements", "host": ["{{baseUrl}}"], "path": ["measurements"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"date\": \"2026-06-20\",\n  \"weight\": 78.5,\n  \"bodyFat\": 14.5,\n  \"chest\": 102.0,\n  \"waist\": 84.5,\n  \"hips\": 98.0,\n  \"bicepLeft\": 36.5,\n  \"bicepRight\": 36.8,\n  \"thighLeft\": 58.0,\n  \"thighRight\": 58.2,\n  \"calves\": 38.0,\n  \"neck\": 39.5,\n  \"shoulders\": 118.0\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "AI Recommendations",
+      "item": [
+        {
+          "name": "Generate Recommendations",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/ai/recommendations", "host": ["{{baseUrl}}"], "path": ["ai", "recommendations"] }
+          }
+        },
+        {
+          "name": "Get Recommendations",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/ai/recommendations?status=pending", "host": ["{{baseUrl}}"], "path": ["ai", "recommendations"], "query": [{ "key": "status", "value": "pending" }] }
+          }
+        },
+        {
+          "name": "Update Recommendation Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/ai/recommendations/{{recommendationId}}", "host": ["{{baseUrl}}"], "path": ["ai", "recommendations", "{{recommendationId}}"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"accepted\"\n}"
+            }
           }
         }
       ]

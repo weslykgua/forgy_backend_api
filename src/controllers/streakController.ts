@@ -39,7 +39,7 @@ export async function updateWorkoutStreak(userId: string) {
       }
     })
   } else {
-    const diffDays = Math.floor((today.getTime() - lastWorkout.getTime()) / (1000 * 60 * 60 * 24))
+    const diffDays = Math.round((today.getTime() - lastWorkout.getTime()) / (1000 * 60 * 60 * 24))
 
     if (diffDays === 0) {
       // Mismo día, no cambiar
@@ -70,7 +70,7 @@ export async function updateWorkoutStreak(userId: string) {
 
 export async function getWorkoutStreak(req: Request, res: Response) {
   try {
-    const userId = req.params.userId as string
+    const userId = req.body.token.userId as string
 
     const streak = await prisma.workoutStreak.findUnique({
       where: { userId }

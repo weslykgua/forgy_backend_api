@@ -4,7 +4,8 @@ import {
     getGoals,
     createGoal,
     updateGoal,
-    deleteGoal
+    deleteGoal,
+    getGoalsProgress
 } from '../controllers/goalController'
 import { validateToken } from '../controllers/authenticationController'
 import prisma from '../config/database'
@@ -156,15 +157,20 @@ export function getGoalRoutes(): Router {
 
     /**
      * GET /api/goals
-     * Query params: userId, achieved? (true/false)
-     * Obtiene las metas del usuario
+     * Query params: achieved? (true/false)
+     * Obtiene las metas del usuario autenticado
      */
-    router.get('/', getGoals)
+    router.get('/', validateToken, getGoals)
+
+    /**
+     * GET /api/goals/progress
+     * Obtiene el progreso de las metas activas del usuario autenticado
+     */
+    router.get('/progress', validateToken, getGoalsProgress)
 
     /**
      * POST /api/goals
      * Body: {
-     *   userId,
      *   type, (weight_loss, muscle_gain, strength, endurance, flexibility)
      *   target,
      *   current,
@@ -172,22 +178,22 @@ export function getGoalRoutes(): Router {
      *   deadline?,
      *   priority?
      * }
-     * Crea una nueva meta
+     * Crea una nueva meta para el usuario autenticado
      */
-    router.post('/', createGoal)
+    router.post('/', validateToken, createGoal)
 
     /**
      * PUT /api/goals/:id
      * Body: { current?, target?, deadline?, achieved?, priority? }
      * Actualiza una meta existente
      */
-    router.put('/:id', updateGoal)
+    router.put('/:id', validateToken, updateGoal)
 
     /**
      * DELETE /api/goals/:id
      * Elimina una meta
      */
-    router.delete('/:id', deleteGoal)
+    router.delete('/:id', validateToken, deleteGoal)
 
     return router
 }

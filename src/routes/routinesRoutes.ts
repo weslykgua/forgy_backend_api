@@ -18,7 +18,7 @@ export function getRoutinesRoutes(): Router {
    * Query params: userId
    * Obtiene todas las rutinas del usuario
    */
-  router.get('/', getRoutines)
+  router.get('/', validateToken, getRoutines)
 
   /**
    * POST /api/routines
@@ -32,13 +32,13 @@ export function getRoutinesRoutes(): Router {
    * Body: { name?, description?, isFavorite?, difficulty? }
    * Actualiza una rutina existente
    */
-  router.put('/:id', updateRoutine)
+  router.put('/:id', validateToken, updateRoutine)
 
   /**
    * DELETE /api/routines/:id
    * Elimina una rutina
    */
-  router.delete('/:id', deleteRoutine)
+  router.delete('/:id', validateToken, deleteRoutine)
 
   /**
    * POST /api/routines/:id/exercises
@@ -53,13 +53,13 @@ export function getRoutinesRoutes(): Router {
    * }
    * Agrega un ejercicio a la rutina con parámetros
    */
-  router.post('/:id/exercises', addExerciseToRoutine)
+  router.post('/:id/exercises', validateToken, addExerciseToRoutine)
 
   /**
    * DELETE /api/routines/:id/exercises/:exerciseId
    * Elimina un ejercicio de la rutina
    */
-  router.delete('/:id/exercises/:exerciseId', removeExerciseFromRoutine)
+  router.delete('/:id/exercises/:exerciseId', validateToken, removeExerciseFromRoutine)
 
   return router
 }
