@@ -29,7 +29,7 @@ export async function getRoutines(req: Request, res: Response) {
 
 export async function createRoutine(req: Request, res: Response) {
   try {
-    const { name, description, token } = req.body
+    const { name, description, difficulty, estimatedDuration, token } = req.body
 
     if (!name) {
       return res.status(400).json({ error: 'Nombre es obligatorios' })
@@ -41,7 +41,9 @@ export async function createRoutine(req: Request, res: Response) {
         name: name,
         userId: token.userId,
         type: "workout",
-        description: description
+        description: description,
+        difficulty: difficulty || 'Principiante',
+        estimatedDuration: estimatedDuration ? Number(estimatedDuration) : null
       }
     })
     res.status(201).json(routine)
@@ -56,7 +58,7 @@ export async function updateRoutine(req: Request, res: Response) {
   try {
     const id = req.params.id as string
     const userId = req.body.token.userId as string
-    const { name, description, isFavorite, difficulty } = req.body
+    const { name, description, isFavorite, difficulty, estimatedDuration } = req.body
 
     const existingRoutine = await prisma.routine.findUnique({
       where: { id }
@@ -68,7 +70,7 @@ export async function updateRoutine(req: Request, res: Response) {
 
     const routine = await prisma.routine.update({
       where: { id },
-      data: { name, description, isFavorite, difficulty }
+      data: { name, description, isFavorite, difficulty, estimatedDuration: estimatedDuration ? Number(estimatedDuration) : null }
     })
 
     res.json(routine)
