@@ -200,44 +200,42 @@ function translateEquipment(eq: string): string {
 
 function mapMuscleGroup(bodyPart: string, target: string): string {
   const bp = (bodyPart || '').toLowerCase().trim();
-  const tg = (target || '').toLowerCase().trim();
-
-  if (bp.includes('chest')) return 'Pecho';
-
-  if (bp.includes('back')) {
-    if (tg.includes('trapezius')) return 'Trapecio';
-    return 'Espalda';
+  switch (bp) {
+    case 'upper arms':
+      return 'Brazos Superiores';
+    case 'upper legs':
+      return 'Piernas Superiores';
+    case 'back':
+      return 'Espalda';
+    case 'waist':
+      return 'Cintura';
+    case 'chest':
+      return 'Pecho';
+    case 'shoulders':
+      return 'Hombros';
+    case 'lower legs':
+      return 'Piernas Inferiores';
+    case 'lower arms':
+      return 'Antebrazos';
+    case 'cardio':
+      return 'Cardio';
+    case 'neck':
+      return 'Cuello';
+    default:
+      if (bp.includes('arm')) {
+        return bp.includes('upper') ? 'Brazos Superiores' : 'Antebrazos';
+      }
+      if (bp.includes('leg')) {
+        return bp.includes('upper') ? 'Piernas Superiores' : 'Piernas Inferiores';
+      }
+      if (bp.includes('back')) return 'Espalda';
+      if (bp.includes('waist') || bp.includes('abs') || bp.includes('core')) return 'Cintura';
+      if (bp.includes('chest')) return 'Pecho';
+      if (bp.includes('shoulder')) return 'Hombros';
+      if (bp.includes('neck')) return 'Cuello';
+      if (bp.includes('cardio')) return 'Cardio';
+      return 'Cintura';
   }
-  if (tg.includes('lats') || tg.includes('latissimus')) return 'Espalda';
-  if (tg.includes('traps') || tg.includes('trapezius')) return 'Trapecio';
-
-  if (bp.includes('shoulders')) return 'Hombros';
-
-  if (bp.includes('upper arms')) {
-    if (tg.includes('biceps')) return 'Bíceps';
-    if (tg.includes('triceps')) return 'Tríceps';
-    return 'Bíceps';
-  }
-
-  if (bp.includes('lower arms') || tg.includes('forearms')) return 'Antebrazos';
-
-  if (bp.includes('waist') || tg.includes('abs') || tg.includes('rectus abdominis') || tg.includes('obliques')) return 'Abdomen';
-
-  if (bp.includes('upper legs')) {
-    if (tg.includes('glutes')) return 'Glúteos';
-    if (tg.includes('quads') || tg.includes('quadriceps')) return 'Cuádriceps';
-    if (tg.includes('hamstrings')) return 'Isquios';
-    if (tg.includes('adductors')) return 'Aductores';
-    if (tg.includes('abductors')) return 'Glúteos';
-    return 'Cuádriceps';
-  }
-
-  if (bp.includes('lower legs') || tg.includes('calves')) return 'Pantorrillas';
-
-  if (bp.includes('neck')) return 'Trapecio';
-  if (bp.includes('cardio')) return 'Abdomen';
-
-  return 'Abdomen';
 }
 
 export async function seedExercisesIfNeeded(force = false) {
@@ -288,7 +286,7 @@ export async function seedExercisesIfNeeded(force = false) {
           equipment: translateEquipment(ex.equipment || 'body weight'),
           instructions: translateInstructions(steps),
           category: 'strength',
-          gifUrl: ex.gif_url ? `https://raw.githubusercontent.com/hasaneyldrm/exercises-dataset/main/data/${ex.gif_url}` : null
+          gifUrl: ex.gif_url ? `https://raw.githubusercontent.com/hasaneyldrm/exercises-dataset/main/${ex.gif_url}` : null
         })
       }
     } else {
