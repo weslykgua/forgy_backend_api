@@ -51,22 +51,9 @@ async function migrateData() {
     console.log(`✅ Usuario creado con ID: ${defaultUser.id}\n`)
 
     // 3. MIGRAR EJERCICIOS
-    console.log('💪 Migrando ejercicios...')
-    const exercisesResult = await prisma.exercise.createMany({
-      data: exercisesDB.map((ex) => ({
-        id: ex.id,
-        name: ex.name,
-        muscle: ex.muscle,
-        video: ex.video || null,
-        description: ex.description || null,
-        difficulty: ex.difficulty || 'beginner',
-        equipment: ex.equipment || 'bodyweight',
-        instructions: ex.instructions || [],
-        category: 'strength'
-      })),
-      skipDuplicates: true
-    })
-    console.log(`✅ ${exercisesResult.count} ejercicios insertados.\n`)
+    console.log('💪 Migrando ejercicios (desde hasaneyldrm/exercises-dataset)...')
+    const { seedExercisesIfNeeded } = require('../utils/seeder')
+    await seedExercisesIfNeeded(true)
 
     // 4. MIGRAR WORKOUTS
     console.log('🏋️ Transformando y migrando entrenamientos...')
