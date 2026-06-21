@@ -47,80 +47,17 @@ export async function seedExercisesIfNeeded(force = false) {
     console.log('Inserting local exercises from exercisesData.ts...')
     for (const ex of exercisesDB) {
       allExercisesToInsert.push({
+        id: ex.id,
         name: ex.name,
-        muscle: mapMuscleGroup(ex.muscle),
+        muscle: ex.muscle,
         video: ex.video || null,
         description: ex.description || null,
-        difficulty: mapDifficulty(ex.difficulty || 'intermediate'),
-        equipment: ex.equipment || 'bodyweight',
+        difficulty: ex.difficulty || 'Principiante',
+        equipment: ex.equipment || 'Ninguno',
         instructions: ex.instructions || [],
         category: 'strength',
         gifUrl: null
       })
-    }
-
-    // 2. Fetch hasaneyldrm/exercises-dataset (1324 exercises)
-    try {
-      console.log('Fetching hasaneyldrm/exercises-dataset (1324 exercises)...')
-      const res = await fetch('https://raw.githubusercontent.com/hasaneyldrm/exercises-dataset/main/data/exercises.json')
-      if (res.ok) {
-        const hasanExercises = await res.json() as any[]
-        console.log(`Fetched ${hasanExercises.length} exercises from hasaneyldrm/exercises-dataset`)
-        for (const ex of hasanExercises) {
-          let steps: string[] = []
-          if (ex.instruction_steps && Array.isArray(ex.instruction_steps.en)) {
-            steps = ex.instruction_steps.en
-          } else if (typeof ex.instructions === 'string') {
-            steps = [ex.instructions]
-          } else if (ex.instructions && typeof ex.instructions.en === 'string') {
-            steps = [ex.instructions.en]
-          }
-
-          allExercisesToInsert.push({
-            name: ex.name,
-            muscle: mapMuscleGroup(ex.body_part || ex.target || ex.muscle_group || 'Cardio'),
-            video: null,
-            description: null,
-            difficulty: 'Principiante',
-            equipment: ex.equipment || 'bodyweight',
-            instructions: steps,
-            category: ex.category || 'strength',
-            gifUrl: ex.gif_url ? `https://raw.githubusercontent.com/hasaneyldrm/exercises-dataset/main/data/${ex.gif_url}` : null
-          })
-        }
-      }
-    } catch (e: any) {
-      console.error('Error fetching hasaneyldrm/exercises-dataset:', e.message)
-    }
-
-    // 3. Fetch yuhonas/free-exercise-db (873 exercises)
-    try {
-      console.log('Fetching yuhonas/free-exercise-db (873 exercises)...')
-      const res = await fetch('https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/dist/exercises.json')
-      if (res.ok) {
-        const yuhonasExercises = await res.json() as any[]
-        console.log(`Fetched ${yuhonasExercises.length} exercises from yuhonas/free-exercise-db`)
-        for (const ex of yuhonasExercises) {
-          // Check if already exists by name
-          const nameLower = ex.name.toLowerCase()
-          const exists = allExercisesToInsert.some(existing => existing.name.toLowerCase() === nameLower)
-          if (!exists) {
-            allExercisesToInsert.push({
-              name: ex.name,
-              muscle: mapMuscleGroup(ex.primaryMuscles?.[0] || 'Cardio'),
-              video: null,
-              description: null,
-              difficulty: mapDifficulty(ex.level || 'beginner'),
-              equipment: ex.equipment || 'bodyweight',
-              instructions: ex.instructions || [],
-              category: ex.category || 'strength',
-              gifUrl: (ex.images && ex.images.length > 0) ? `https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/${ex.images[0]}` : null
-            })
-          }
-        }
-      }
-    } catch (e: any) {
-      console.error('Error fetching yuhonas/free-exercise-db:', e.message)
     }
 
     console.log(`Inserting ${allExercisesToInsert.length} exercises in database...`)
