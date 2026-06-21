@@ -174,10 +174,14 @@ const startServer = async () => {
     await connectDB()
 
     // Sembrar ejercicios automáticamente si la base de datos está vacía
-    const { seedExercisesIfNeeded } = require('./utils/seeder')
-    seedExercisesIfNeeded().catch((err: any) => {
-      console.error('Error durante auto-seeding de ejercicios:', err)
-    })
+    const { seedExercisesIfNeeded, fixMuscleCategories } = require('./utils/seeder')
+    seedExercisesIfNeeded()
+      .then(() => {
+        return fixMuscleCategories();
+      })
+      .catch((err: any) => {
+        console.error('Error durante auto-seeding o corrección de ejercicios:', err)
+      })
 
     httpServer.listen(Number(PORT), '0.0.0.0', () => {
       console.log(`🚀 Servidor corriendo en puerto ${PORT}`)

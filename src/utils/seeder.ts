@@ -456,3 +456,45 @@ export async function seedExercisesIfNeeded(force = false) {
     console.error('❌ Error during exercise seeding:', error)
   }
 }
+
+export async function fixMuscleCategories() {
+  try {
+    console.log('🔄 Verificando y corrigiendo categorías de músculos de ejercicios...');
+    const check = await prisma.exercise.count({
+      where: {
+        muscle: {
+          in: ['Cuello', 'Pantorrillas', 'Antebrazos']
+        }
+      }
+    });
+
+    if (check === 0) {
+      const totalCount = await prisma.exercise.count();
+      if (totalCount > 0) {
+        console.log('⚠️ La base de datos tiene ejercicios pero carece de las categorías Cuello, Pantorrillas o Antebrazos. Corrigiendo clasificaciones antiguas...');
+
+        const resCuello = await prisma.exercise.updateMany({
+          where: { muscleGroup: { in: ['cuello', 'neck'] } },
+          data: { muscle: 'Cuello' }
+        });
+        console.log(`✅ Se actualizaron ${resCuello.count} ejercicios de cuello a 'Cuello'`);
+
+        const resPantorrillas = await prisma.exercise.updateMany({
+          where: { muscleGroup: { in: ['pantorrillas', 'calves'] } },
+          data: { muscle: 'Pantorrillas' }
+        });
+        console.log(`✅ Se actualizaron ${resPantorrillas.count} ejercicios de pantorrillas a 'Pantorrillas'`);
+
+        const resAntebrazos = await prisma.exercise.updateMany({
+          where: { muscleGroup: { in: ['antebrazos', 'forearms'] } },
+          data: { muscle: 'Antebrazos' }
+        });
+        console.log(`✅ Se actualizaron ${resAntebrazos.count} ejercicios de antebrazos a 'Antebrazos'`);
+      }
+    } else {
+      console.log('ℹ️ Las categorías de Cuello, Pantorrillas y Antebrazos ya están presentes en la base de datos.');
+    }
+  } catch (error) {
+    console.error('❌ Error al corregir categorías de músculos:', error);
+  }
+}
