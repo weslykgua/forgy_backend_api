@@ -227,7 +227,61 @@ function translateInstructions(instructions: string[] | string): string[] {
     [/return to the/gi, 'regresa a la'],
     [/slowly rise/gi, 'sube lentamente'],
     [/lift your/gi, 'levanta tu'],
-    [/raise your/gi, 'eleva tus']
+    [/raise your/gi, 'eleva tus'],
+    
+    // Más verbos y frases añadidas para una traducción mucho más completa
+    [/engage your core/gi, 'activa tu abdomen'],
+    [/keep your chest up/gi, 'mantén el pecho erguido'],
+    [/place your hands/gi, 'coloca tus manos'],
+    [/place your feet/gi, 'coloca tus pies'],
+    [/slowly lift/gi, 'levanta lentamente'],
+    [/slowly push/gi, 'empuja lentamente'],
+    [/hold the position/gi, 'sostén la posición'],
+    [/for a few seconds/gi, 'por unos segundos'],
+    [/for a moment/gi, 'por un momento'],
+    [/grasp the/gi, 'agarra el'],
+    [/sit on the/gi, 'siéntate en el'],
+    [/sit on a/gi, 'siéntate en un'],
+    [/stand on the/gi, 'párate en el'],
+    [/lean forward/gi, 'inclínate hacia adelante'],
+    [/slowly pull/gi, 'tira lentamente de'],
+    [/bend your elbows/gi, 'dobla los codos'],
+    [/straighten your/gi, 'endereza tu'],
+    [/contract your/gi, 'contrae tus'],
+    [/extend your/gi, 'extiende tu'],
+    [/lower your/gi, 'baja tu'],
+    [/raise your/gi, 'eleva tu'],
+    [/repeat the movement/gi, 'repite el movimiento'],
+    [/squeeze your/gi, 'aprieta tu'],
+    [/bring your/gi, 'lleva tu'],
+    [/drive your/gi, 'empuja tu'],
+    [/push through your/gi, 'empuja con tus'],
+    [/press the/gi, 'presiona el'],
+    [/pull the/gi, 'tira del'],
+    [/at the bottom/gi, 'en la parte inferior'],
+    [/at the top/gi, 'en la parte superior'],
+    [/in a controlled/gi, 'de manera controlada'],
+    [/keep your knees/gi, 'mantén tus rodillas'],
+    [/place a/gi, 'coloca un'],
+    [/step forward/gi, 'da un paso adelante'],
+    [/step backward/gi, 'da un paso atrás'],
+    [/with your hands/gi, 'con tus manos'],
+    [/with your feet/gi, 'con tus pies'],
+    [/on the floor/gi, 'en el suelo'],
+    [/on the ground/gi, 'en el suelo'],
+    [/in front of/gi, 'delante de'],
+    [/behind your/gi, 'detrás de tu'],
+    [/to the side/gi, 'a un lado'],
+    [/upwards/gi, 'hacia arriba'],
+    [/downwards/gi, 'hacia abajo'],
+    [/forward/gi, 'hacia adelante'],
+    [/backward/gi, 'hacia atrás'],
+    [/until your/gi, 'hasta que tu'],
+    [/so that your/gi, 'de modo que tu'],
+    [/make sure to/gi, 'asegúrate de'],
+    [/avoid locking/gi, 'evita bloquear'],
+    [/avoid swinging/gi, 'evita balancear'],
+    [/keep your body/gi, 'mantén tu cuerpo']
   ];
 
   for (const step of instrArray) {
@@ -271,19 +325,19 @@ function mapMuscleGroup(bodyPart: string, target: string): string {
   const bp = (bodyPart || '').toLowerCase().trim();
   switch (bp) {
     case 'upper arms':
-      return 'Brazos Superiores';
+      return 'Brazos';
     case 'upper legs':
-      return 'Piernas Superiores';
+      return 'Piernas';
     case 'back':
       return 'Espalda';
     case 'waist':
-      return 'Cintura';
+      return 'Abdomen';
     case 'chest':
       return 'Pecho';
     case 'shoulders':
       return 'Hombros';
     case 'lower legs':
-      return 'Piernas Inferiores';
+      return 'Pantorrillas';
     case 'lower arms':
       return 'Antebrazos';
     case 'cardio':
@@ -292,18 +346,18 @@ function mapMuscleGroup(bodyPart: string, target: string): string {
       return 'Cuello';
     default:
       if (bp.includes('arm')) {
-        return bp.includes('upper') ? 'Brazos Superiores' : 'Antebrazos';
+        return bp.includes('upper') ? 'Brazos' : 'Antebrazos';
       }
       if (bp.includes('leg')) {
-        return bp.includes('upper') ? 'Piernas Superiores' : 'Piernas Inferiores';
+        return bp.includes('upper') ? 'Piernas' : 'Pantorrillas';
       }
       if (bp.includes('back')) return 'Espalda';
-      if (bp.includes('waist') || bp.includes('abs') || bp.includes('core')) return 'Cintura';
+      if (bp.includes('waist') || bp.includes('abs') || bp.includes('core')) return 'Abdomen';
       if (bp.includes('chest')) return 'Pecho';
       if (bp.includes('shoulder')) return 'Hombros';
       if (bp.includes('neck')) return 'Cuello';
       if (bp.includes('cardio')) return 'Cardio';
-      return 'Cintura';
+      return 'Abdomen';
   }
 }
 
