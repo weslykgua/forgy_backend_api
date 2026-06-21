@@ -30,7 +30,9 @@ export async function getExercises(req: Request, res: Response) {
     if (search) {
       where.OR = [
         { name: { contains: search, mode: 'insensitive' } },
-        { description: { contains: search, mode: 'insensitive' } }
+        { description: { contains: search, mode: 'insensitive' } },
+        { target: { contains: search, mode: 'insensitive' } },
+        { muscleGroup: { contains: search, mode: 'insensitive' } }
       ]
     }
 

@@ -1,5 +1,74 @@
 import prisma from '../config/database'
 
+const termTranslations: Record<string, string> = {
+  'abs': 'abdominales',
+  'abductors': 'abductores',
+  'adductors': 'aductores',
+  'biceps': 'bíceps',
+  'calves': 'pantorrillas',
+  'cardio': 'cardio',
+  'chest': 'pecho',
+  'delts': 'deltoides',
+  'deltoids': 'deltoides',
+  'forearms': 'antebrazos',
+  'glutes': 'glúteos',
+  'hamstrings': 'isquiotibiales',
+  'lats': 'dorsales',
+  'lower back': 'espalda baja',
+  'neck': 'cuello',
+  'quads': 'cuádriceps',
+  'quadriceps': 'cuádriceps',
+  'shoulders': 'hombros',
+  'traps': 'trapecios',
+  'trapezius': 'trapecio',
+  'triceps': 'tríceps',
+  'upper back': 'espalda alta',
+  'levator scapulae': 'elevador de la escápula',
+  'sternocleidomastoid': 'esternocleidomastoideo',
+  'hip flexors': 'flexores de cadera',
+  'serratus anterior': 'serrato anterior',
+  'obliques': 'oblicuos',
+  'spine': 'columna',
+  'back': 'espalda',
+  'iliopsoas': 'iliopsóas',
+  'tensor fasciae latae': 'tensor de la fascia lata',
+  'pectoralis major': 'pectoral mayor',
+  'latissimus dorsi': 'dorsal ancho',
+  'teres major': 'redondo mayor',
+  'rhomboids': 'romboides',
+  'brachioradialis': 'braquiorradial',
+  'pronator teres': 'pronador redondo',
+  'wrist flexors': 'flexores de muñeca',
+  'wrist extensors': 'extensores de muñeca',
+  'gastrocnemius': 'gastrocnemio (gemelos)',
+  'soleus': 'sóleo',
+  'gluteus maximus': 'glúteo mayor',
+  'gluteus medius': 'glúteo medio',
+  'rectus femoris': 'recto femoral',
+  'vastus lateralis': 'vasto lateral',
+  'vastus medialis': 'vasto medial',
+  'biceps femoris': 'bíceps femoral',
+  'semitendinosus': 'semitendinoso',
+  'semimembranosus': 'semimembranoso',
+  'iliocostalis': 'iliocostal',
+  'longissimus': 'longísimo',
+  'spinalis': 'espinoso',
+  'rectus abdominis': 'recto abdominal',
+  'transverse abdominis': 'transverso del abdomen',
+  'internal obliques': 'oblicuos internos',
+  'external obliques': 'oblicuos externos',
+  'rotator cuff': 'manguito rotador',
+  'supraspinatus': 'supraespinoso',
+  'infraspinatus': 'infraespinoso',
+  'teres minor': 'redondo menor',
+  'subscapularis': 'subescapular'
+};
+
+function translateTerm(term: string): string {
+  const clean = (term || '').toLowerCase().trim();
+  return termTranslations[clean] || clean;
+}
+
 function translateName(name: string): string {
   let translated = name.toLowerCase().trim();
   
@@ -276,17 +345,39 @@ export async function seedExercisesIfNeeded(force = false) {
           }
         }
 
+        const targetEsp = translateTerm(ex.target);
+        const muscleGroupEsp = translateTerm(ex.muscle_group);
+        const secondaryEsp = (ex.secondary_muscles || []).map((m: string) => translateTerm(m));
+        
+        let desc = `Músculo principal: ${muscleGroupEsp} (${ex.muscle_group || ''}).`;
+        if (targetEsp) {
+          desc += ` Objetivo específico: ${targetEsp} (${ex.target || ''}).`;
+        }
+        if (secondaryEsp.length > 0) {
+          desc += ` Músculos secundarios: ${secondaryEsp.join(', ')} (${(ex.secondary_muscles || []).join(', ')}).`;
+        }
+
+        const resolvedGifUrl = ex.gif_url 
+          ? `https://raw.githubusercontent.com/hasaneyldrm/exercises-dataset/main/${ex.gif_url}`
+          : (ex.image ? `https://raw.githubusercontent.com/hasaneyldrm/exercises-dataset/main/${ex.image}` : null);
+
+        const mappedBodyPart = mapMuscleGroup(ex.body_part || ex.category || '', ex.target || '');
+
         allExercisesToInsert.push({
           id: ex.id,
           name: translateName(ex.name),
-          muscle: mapMuscleGroup(ex.body_part || ex.category || '', ex.target || ''),
+          muscle: mappedBodyPart,
           video: null,
-          description: null,
+          description: desc,
           difficulty: 'Principiante',
           equipment: translateEquipment(ex.equipment || 'body weight'),
           instructions: translateInstructions(steps),
           category: 'strength',
-          gifUrl: ex.gif_url ? `https://raw.githubusercontent.com/hasaneyldrm/exercises-dataset/main/${ex.gif_url}` : null
+          gifUrl: resolvedGifUrl,
+          bodyPart: mappedBodyPart,
+          muscleGroup: muscleGroupEsp,
+          secondaryMuscles: secondaryEsp,
+          target: targetEsp
         })
       }
     } else {

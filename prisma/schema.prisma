@@ -53,6 +53,11 @@ model Exercise {
   category     String?  // strength, cardio, flexibility, balance
   gifUrl       String?
 
+  bodyPart         String?
+  muscleGroup      String?
+  secondaryMuscles String[]
+  target           String?
+
   workoutLogs  WorkoutLog[]
   routines     RoutineExercise[]
   records      PersonalRecord[]
