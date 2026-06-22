@@ -36,7 +36,10 @@ const allowedOrigins = [
   'https://forgy-mobile-app.vercel.app',
   'http://localhost:5173',
   'http://localhost:8100',
-  'http://localhost:3000'
+  'http://localhost:3000',
+  'http://localhost',       // Origen por defecto en Android (Capacitor)
+  'https://localhost',      // Origen en Android/iOS con HTTPS
+  'capacitor://localhost'   // Origen por defecto en iOS (Capacitor)
 ]
 
 if (process.env.FRONTEND_URL) {
